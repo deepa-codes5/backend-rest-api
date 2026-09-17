@@ -17,4 +17,5 @@ router.put("/students/:id", (req, res) => {
         message: "Student updated successfully"
     });
 });
+
 module.exports = router;

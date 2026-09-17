@@ -1,9 +1,12 @@
 var express = require('express');
 var router = express.Router();
+const studentController = require("../controllers/studentController");
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
-});
+router.get("/", studentController.getIndex);
+router.post("/", studentController.createStudent);
+router.put("/:id", studentController.updateStudent);
+router.delete('/:id', studentController.deleteStudent);
+
+
 
 module.exports = router;
