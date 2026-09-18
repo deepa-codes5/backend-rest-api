@@ -5,7 +5,6 @@ var cookieParser = require('cookie-parser');
 const mongoose = require("mongoose");
 var logger = require('morgan');
 const studentRouter = require("./routes/studentRoute");
-
 var indexRouter = require('./routes/index');
 
 
