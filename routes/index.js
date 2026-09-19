@@ -1,57 +1,27 @@
 var express = require('express');
-const { body,validationResult,checkExact } = require("express-validator");
-const studentController = require("../controllers/studentController");
+var fs = require('fs');
+var path = require('path');
+
 var router = express.Router();
-router.get("/", studentController.getIndex);
-router.post(
-    "/",
-     checkExact([
-        body("name"),
-        body("email"),
-        body("password"),
-        body("mobile")
-    ]),
-    body("name")
-    .notEmpty()
-    .withMessage("Name is required")
-    .isString()
-    .withMessage("Name must be a string "),
 
-     body("email")
-        .notEmpty().withMessage("Email is required")
-        .isEmail()
-        .withMessage("invalid email")
-        ,
+function removeExtensionFromFile(fileName) {
+    return path.parse(fileName).name;
+}
 
-    body("password")
-        .notEmpty().withMessage("Password is required")
-        .isInt()
-        .withMessage("Password must be a number "),
-        
+var routesPath = __dirname;
 
-    body("mobile")
-        .notEmpty().withMessage("Mobile number is required")
-        .isInt().withMessage("Mobile number is not a integer")
-        .isLength({ min: 10, max: 10 })
-        .withMessage("Mobile number is not valid"),
-    (req, res, next) => {
+router.use('/', require('./auth'));
 
-        const errors = validationResult(req);
+fs.readdirSync(routesPath)
+    .filter((file) => {
+        var routeFile = removeExtensionFromFile(file);
 
-        if (!errors.isEmpty()) {
-            return res.status(400).json(errors.array());
-        }else{
-            res.json({ message: "Success" });
-        }
-
-        next();
-    },
-
-    studentController.createStudent
-);
-router.put("/:id", studentController.updateStudent);
-router.delete('/:id', studentController.deleteStudent);
-
-
+        return routeFile !== 'index' && routeFile !== 'auth' && file !== '.DS_Store';
+    })
+    .forEach((file) => {
+        var routeFile = removeExtensionFromFile(file);
+        router.use(`/${routeFile}`, require(`./${routeFile}`));
+    });
 
 module.exports = router;
+

@@ -1,21 +1,13 @@
-const express = require("express")
-const router = express.Router()
-router.get("/students", (req, res) => {
-    res.json({
-        message: "Students data"
-    });
-});
+var express = require('express');
 
-router.post('/students',(req,res)=>{
-    res.json({
-        message:"students data is created"
-    })
-})
+const studentController = require('../controllers/studentController');
+const { validateStudentPayload } = require('../helpers/validators/studentValidator');
 
-router.put("/students/:id", (req, res) => {
-    res.json({
-        message: "Student updated successfully"
-    });
-});
+var router = express.Router();
+
+router.get('/', studentController.getIndex);
+router.post('/', validateStudentPayload, studentController.createStudent);
+router.put('/:id', studentController.updateStudent);
+router.delete('/:id', studentController.deleteStudent);
 
 module.exports = router;
