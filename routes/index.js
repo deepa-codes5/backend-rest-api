@@ -11,6 +11,7 @@ function removeExtensionFromFile(fileName) {
 var routesPath = __dirname;
 
 router.use('/', require('./auth'));
+router.use('/students', require('./studentRoute'));
 
 fs.readdirSync(routesPath)
     .filter((file) => {
