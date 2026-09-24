@@ -3,7 +3,8 @@ const jwt = require("jsonwebtoken");
 
 var { validateRegister } = require('../helpers/validators/authValidator');
 const Student = require('../models/studentModel');
-const authMiddleware = require('../middleware/authMiddleware')
+const authController = require('../controllers/authController');
+const authMiddleware = require('../middleware/authMiddleware');
 
 var router = express.Router();
 
@@ -13,18 +14,21 @@ router.get('/', (req, res) => {
   });
 });
 
-router.post('/register', validateRegister, (req, res) => {
-  res.status(201).json({
-    message: 'User registered successfully',
-    payload: req.body,
-  });
+router.post('/register', validateRegister, async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    const newStudent = await Student.create({ name, email, password });
+    return res.status(201).json({
+      message: 'User registered successfully',
+      payload: newStudent
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Registration failed',
+      error: error.message
+    });
+  }
 });
-
-router.get('/login',(req,res)=>{
-  res.status(200).json({
-    message:'login route created'
-  })
-})
 
 router.post("/login", async (req, res) => {
 
@@ -43,6 +47,7 @@ router.post("/login", async (req, res) => {
       message: "Invalid password"
     });
   }
+
    const token = jwt.sign(
   { id: student._id, email: student.email },
   "mySecretKey",
@@ -56,4 +61,7 @@ router.post("/login", async (req, res) => {
  
 
 });
-module.exports = router, authMiddleware;
+router.get('/me', authMiddleware, authController.getUserById);
+router.put('/me', authMiddleware, authController.editUserById);
+router.delete('/me', authMiddleware, authController.deleteUserById)
+module.exports = router;
