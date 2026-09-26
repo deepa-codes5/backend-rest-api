@@ -8,9 +8,16 @@ const studentSchema = new mongoose.Schema({
 
     password: String,
 
-    mobileNumber: String
+    mobileNumber: String,
 
+    role: {
+    type: String,
+    enum: ["admin", "user"],
+    default: "user"
+  }
 });
+
+ 
 
 const Student = mongoose.model("Student", studentSchema);
 

@@ -2,7 +2,7 @@ const Student = require("../models/studentModel");
 
    const getIndex = async (req, res) => {
     try {
-        const students = await Student.find();
+        const students = await Student.findById(req.user.id);
 
         res.status(200).json({
             students: students
@@ -39,7 +39,7 @@ const createStudent = async (req, res) => {
 const updateStudent = async (req, res) => {
     try {
         const student = await Student.findByIdAndUpdate(
-            req.params.id,
+            req.user.id,
             req.body,
             { new: true }
         );
@@ -59,7 +59,7 @@ const updateStudent = async (req, res) => {
 
 const deleteStudent = async (req, res) => {
     try {
-        const student = await Student.findByIdAndDelete(req.params.id);
+        const student = await Student.findByIdAndDelete(req.user.id);
 
         if (!student) {
             return res.status(404).json({ message: "Student not found" });
