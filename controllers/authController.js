@@ -58,9 +58,85 @@ const deleteUserById = async (req, res) => {
         res.status(500).json({ message: "Error deleting user", error: error.message });
     }
 };
+const getAllUsers = async (req, res) => {
+    try {
 
+        const students = await Student.find().select("-password -otp -otpExpires");
+
+        res.status(200).json({
+            students: students
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            message: "Failed to fetch users",
+            error: error.message
+        });
+
+    }
+};
+const editUserByAdmin = async (req, res) => {
+    try {
+
+        const student = await Student.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        );
+
+        if (!student) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+
+        const safeStudent = await Student.findById(req.params.id)
+            .select("-password -otp -otpExpires");
+
+        res.status(200).json({
+            message: "User updated successfully",
+            student: safeStudent
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            message: "User update failed",
+            error: error.message
+        });
+
+    }
+};
+const deleteUserByAdmin = async (req, res) => {
+    try {
+
+        const student = await Student.findByIdAndDelete(req.params.id);
+
+        if (!student) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+
+        res.status(200).json({
+            message: "User deleted successfully"
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            message: "User deletion failed",
+            error: error.message
+        });
+
+    }
+};
 module.exports = {
     getUserById,
     editUserById,
-    deleteUserById
+    deleteUserById,
+    getAllUsers,
+    editUserByAdmin,
+    deleteUserByAdmin
 };
