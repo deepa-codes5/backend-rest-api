@@ -1,0 +1,324 @@
+.register-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 25px;
+  box-sizing: border-box;
+
+  position: relative;
+  overflow: hidden;
+
+  background: #17121f;
+}
+
+/* Animated background glow */
+
+.register-container::before {
+  content: "";
+
+  position: absolute;
+
+  width: 350px;
+  height: 350px;
+
+  background: #f43f5e;
+
+  border-radius: 50%;
+
+  top: -120px;
+  left: -100px;
+
+  filter: blur(90px);
+
+  opacity: 0.55;
+
+  animation: pinkGlow 7s ease-in-out infinite alternate;
+}
+
+.register-container::after {
+  content: "";
+
+  position: absolute;
+
+  width: 350px;
+  height: 350px;
+
+  background: #f97316;
+
+  border-radius: 50%;
+
+  right: -120px;
+  bottom: -120px;
+
+  filter: blur(90px);
+
+  opacity: 0.5;
+
+  animation: orangeGlow 8s ease-in-out infinite alternate;
+}
+
+
+/* Register Card */
+
+.register-box {
+  width: 420px;
+
+  padding: 42px;
+
+  position: relative;
+  z-index: 2;
+
+  box-sizing: border-box;
+
+  background: rgba(255, 255, 255, 0.08);
+
+  border: 1px solid rgba(255, 255, 255, 0.18);
+
+  border-radius: 24px;
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  box-shadow:
+    0 25px 60px rgba(0, 0, 0, 0.45);
+
+  animation: cardEnter 0.8s ease-out;
+}
+
+
+/* Heading */
+
+.register-box h1 {
+  margin: 0 0 30px;
+
+  text-align: center;
+
+  font-size: 34px;
+
+  font-weight: 700;
+
+  color: #ffffff;
+}
+
+.register-box h1::after {
+  content: "";
+
+  display: block;
+
+  width: 60px;
+  height: 4px;
+
+  margin: 12px auto 0;
+
+  border-radius: 10px;
+
+  background: #fb7185;
+
+  animation: lineGrow 1s ease-out;
+}
+
+
+/* Inputs */
+
+.register-box input {
+  width: 100%;
+
+  padding: 14px 16px;
+
+  margin-bottom: 16px;
+
+  box-sizing: border-box;
+
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  border-radius: 10px;
+
+  outline: none;
+
+  background: rgba(255, 255, 255, 0.1);
+
+  color: white;
+
+  font-size: 15px;
+
+  transition: all 0.3s ease;
+}
+
+.register-box input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.register-box input:focus {
+  border-color: #fb7185;
+
+  background: rgba(255, 255, 255, 0.15);
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 0 18px rgba(251, 113, 133, 0.25);
+}
+
+
+/* Button */
+
+.register-box button {
+  width: 100%;
+
+  padding: 14px;
+
+  margin-top: 5px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background: linear-gradient(
+    135deg,
+    #f43f5e,
+    #f97316
+  );
+
+  color: white;
+
+  font-size: 16px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.3s ease;
+}
+
+.register-box button:hover {
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 12px 25px rgba(244, 63, 94, 0.3);
+}
+
+.register-box button:active {
+  transform: translateY(0);
+}
+
+
+/* Login text */
+
+.register-box p {
+  margin-top: 22px;
+
+  text-align: center;
+
+  color: rgba(255, 255, 255, 0.7);
+
+  font-size: 14px;
+}
+
+.register-box span {
+  color: #fb7185;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.3s;
+}
+
+.register-box span:hover {
+  color: #fdba74;
+}
+
+
+/* =====================
+   Animations
+   ===================== */
+
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pinkGlow {
+  from {
+    transform: translate(0, 0);
+  }
+
+  to {
+    transform: translate(120px, 80px);
+  }
+}
+
+@keyframes orangeGlow {
+  from {
+    transform: translate(0, 0);
+  }
+
+  to {
+    transform: translate(-100px, -80px);
+  }
+}
+
+@keyframes lineGrow {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 60px;
+  }
+}
+
+
+/* =====================
+   Responsive
+   ===================== */
+
+@media (max-width: 768px) {
+
+  .register-container {
+    padding: 20px;
+  }
+
+  .register-box {
+    width: 100%;
+
+    max-width: 420px;
+
+    padding: 35px 25px;
+
+    border-radius: 20px;
+  }
+
+  .register-box h1 {
+    font-size: 30px;
+  }
+}
+
+
+@media (max-width: 400px) {
+
+  .register-container {
+    padding: 15px;
+  }
+
+  .register-box {
+    padding: 30px 20px;
+  }
+
+  .register-box h1 {
+    font-size: 27px;
+  }
+
+  .register-box input {
+    padding: 12px;
+  }
+}
