@@ -1,4 +1,5 @@
 var createError = require('http-errors');
+const cors = require("cors");
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
@@ -6,11 +7,12 @@ const mongoose = require("mongoose");
 var logger = require('morgan');
 const http = require('http');
 const { Server } = require('socket.io');
-const studentRouter = require("./routes/studentRoute");
+
 var indexRouter = require('./routes/index');
 
 
 var app = express();
+app.use(cors());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -70,6 +72,6 @@ io.on('connection', (socket) => {
 
 });
 
-server.listen(3000, () => {
-  console.log("Server running on port 3000");
+server.listen(5000, () => {
+  console.log("Server running on port 5000");
 });

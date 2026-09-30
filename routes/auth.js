@@ -29,6 +29,7 @@ router.post('/register', validateRegister, async (req, res) => {
 
     const { name, email, password, mobileNumber } = req.body;
 
+
     const otp = crypto.randomInt(100000, 1000000).toString();
 
     const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
@@ -42,9 +43,10 @@ router.post('/register', validateRegister, async (req, res) => {
       isVerified: false,
       otpExpires: otpExpires
     });
+    console.log("GENERATED OTP:", otp);
 
     await transporter.sendMail({
-      from: "your-email@gmail.com",
+      from: "deepaofficial511@gmail.com",
       to: email,
       subject: "Your OTP",
       text: `Your OTP is ${otp}. It is valid for 5 minutes.`
@@ -66,24 +68,36 @@ router.post('/register', validateRegister, async (req, res) => {
 });
 
 router.post('/verify-otp', async (req, res) => {
-
   try {
 
     const { email, otp } = req.body;
 
     const student = await Student.findOne({ email });
+console.log("FULL STUDENT:", student);
+console.log("DB OTP:", student?.otp);
 
+    // User check
+    if (!student) {
+      return res.status(404).json({
+        message: "User not found"
+      });
+    }
+
+    // OTP check
     if (student.otp !== otp) {
       return res.status(400).json({
         message: "Invalid OTP"
       });
     }
 
+    // OTP expiry check
     if (student.otpExpires < new Date()) {
       return res.status(400).json({
         message: "OTP expired"
       });
     }
+
+    // Verification success
     student.isVerified = true;
     student.otp = undefined;
     student.otpExpires = undefined;
@@ -94,14 +108,6 @@ router.post('/verify-otp', async (req, res) => {
       message: "OTP verified successfully"
     });
 
-    if (!student) {
-      return res.status(404).json({
-        message: "User not found"
-      });
-    }
-
-
-
   } catch (error) {
 
     return res.status(500).json({
@@ -110,7 +116,6 @@ router.post('/verify-otp', async (req, res) => {
     });
 
   }
-
 });
 
 router.post("/login", async (req, res) => {
