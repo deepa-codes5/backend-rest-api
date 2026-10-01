@@ -14,6 +14,7 @@ function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/otp" element={<OtpVerification />} />
         
+        
 
       </Routes>
     </BrowserRouter>

@@ -1,58 +1,14 @@
 
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "./login.css";
+import { toast, ToastContainer } from "react-toastify";
 
 function Login() {
 
-  const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  const handleLogin = async () => {
-
-    try {
-
-      const response = await fetch("http://localhost:5000/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password
-        })
-      });
-
-      const data = await response.json();
-
-      console.log(data);
-
-      if (response.ok) {
-
-        // JWT token save
-        localStorage.setItem("token", data.token);
-
-        alert("Login successful");
-
-        // Go to Home page
-        navigate("/home");
-
-      } else {
-
-        alert(data.message);
-
-      }
-
-    } catch (error) {
-
-      console.log(error);
-      alert("Something went wrong");
-
-    }
-  };
-
   return (
     <div className="login-container">
 
@@ -74,9 +30,15 @@ function Login() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button onClick={handleLogin}>
+        <button onClick={()=>{
+          if(!email || !password){
+            toast.error("please enter the empty field")
+          }
+          toast.success("login succesfully")
+        }}>
           Login
         </button>
+        <ToastContainer/>
 
         <p>
           Don't have an account?{" "}

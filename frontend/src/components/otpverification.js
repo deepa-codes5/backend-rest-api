@@ -1,44 +1,15 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import "./otpverification.css";
+import { toast, ToastContainer } from "react-toastify";
 
 function OTPVerification() {
-  const navigate = useNavigate();
+
 
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
 
-  const handleVerifyOTP = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/verify-otp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email: email,
-          otp: otp
-        })
-      });
-
-      const data = await response.json();
-
-      console.log(data);
-
-      if (response.ok) {
-        alert("OTP verified successfully");
-        navigate("/login");
-      } else {
-        alert(data.message);
-      }
-
-    } catch (error) {
-      console.log(error);
-      alert("Something went wrong");
-    }
-  };
-
+ 
   return (
     <div className="otp-container">
 
@@ -62,9 +33,16 @@ function OTPVerification() {
           onChange={(e) => setOtp(e.target.value)}
         />
 
-        <button onClick={handleVerifyOTP}>
+        <button onClick={()=>{
+          if(!email || !otp){
+            toast.error("please enter the empty filed")
+            return
+          }
+          toast.success("otp send to email")
+        }}>
           Verify OTP
         </button>
+        <ToastContainer/>
 
         <p className="resend-text">
           Didn't receive OTP? <span>Resend OTP</span>

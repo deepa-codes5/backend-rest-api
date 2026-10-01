@@ -1,66 +1,17 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "./register.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Welcome from "./example";
+
 
 function Register() {
-
-  const navigate = useNavigate();
-
-  const [name, setName] = useState("");
+  const [name, setName] = useState("deepa");
   const [email, setEmail] = useState("");
   const [mobilenumber, setMobilenumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
-  const handleRegister = async () => {
-
-    // Password check
-    if (password !== confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
-
-    try {
-
-      const userData = {
-        name: name,
-        email: email,
-        mobileNumber: mobilenumber,
-        password: password
-      };
-
-      const response = await fetch("http://localhost:5000/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(userData)
-      });
-
-      const data = await response.json();
-
-      console.log(data);
-
-      if (response.ok) {
-
-        alert("Registration successful. OTP sent to your email.");
-
-        // Register success → OTP page
-        navigate("/otp");
-
-      } else {
-
-        alert(data.message);
-
-      }
-
-    } catch (error) {
-
-      console.log(error);
-      alert("Something went wrong");
-
-    }
-  };
 
   return (
     <div className="register-container">
@@ -104,15 +55,22 @@ function Register() {
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
 
-        <button onClick={handleRegister}>
+        <button onClick={()=> {
+          if (!name|| !email|| !mobilenumber||!password|| !confirmPassword){
+              toast.error("please enter the empty field")
+              return;
+          }
+              toast.success("Registered successfully")
+        }}>
           Register
         </button>
+        <ToastContainer />
 
         <p>
           Already have an account?{" "}
           <Link to="/login">Login</Link>
         </p>
-
+          <Welcome/>
       </div>
 
     </div>
