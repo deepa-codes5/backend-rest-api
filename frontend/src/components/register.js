@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import "./register.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Welcome from "./example";
 
 
 function Register() {
@@ -70,7 +69,7 @@ function Register() {
           Already have an account?{" "}
           <Link to="/login">Login</Link>
         </p>
-          <Welcome/>
+         
       </div>
 
     </div>

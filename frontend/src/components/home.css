@@ -6,30 +6,22 @@
 
 .navbar {
   width: 100%;
-
   padding: 18px 40px;
-
   box-sizing: border-box;
-
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   background: #17121f;
-
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-
   position: sticky;
   top: 0;
-
   z-index: 10;
 }
 
 .logo {
   font-size: 26px;
   font-weight: 700;
-
-  color: #ffffff;
+  color: white;
 }
 
 .search-box {
@@ -77,16 +69,13 @@
 .nav-links {
   display: flex;
   align-items: center;
-
   gap: 25px;
 }
 
 
 .nav-links span {
   color: rgba(255, 255, 255, 0.8);
-
   font-size: 14px;
-
   cursor: pointer;
 }
 
@@ -239,7 +228,6 @@
 
 .service-card h3 {
   color: #fb7185;
-
   margin-bottom: 15px;
 }
 

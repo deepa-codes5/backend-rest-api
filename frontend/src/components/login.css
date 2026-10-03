@@ -14,7 +14,6 @@
 }
 
 
-/* Background Glow */
 
 .login-container::before {
   content: "";
@@ -61,7 +60,7 @@
 }
 
 
-/* Login Box */
+
 
 .login-box {
   width: 420px;
@@ -89,7 +88,7 @@
 }
 
 
-/* Heading */
+
 
 .login-box h1 {
   margin: 0 0 30px;
@@ -121,7 +120,7 @@
 }
 
 
-/* Inputs */
+
 
 .login-box input {
   width: 100%;
@@ -163,7 +162,7 @@
 }
 
 
-/* Login Button */
+
 
 .login-box button {
   width: 100%;
@@ -205,7 +204,6 @@
 }
 
 
-/* Register Text */
 
 .login-box p {
   margin-top: 22px;
@@ -232,7 +230,6 @@
 }
 
 
-/* Animations */
 
 @keyframes cardEnter {
   from {

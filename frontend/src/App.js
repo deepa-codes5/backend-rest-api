@@ -3,6 +3,7 @@ import Register from "./components/register";
 import Login from "./components/login";
 import Home from "./components/home";
 import OtpVerification from "./components/otpverification";
+import Supportticket from "./components/supportticket";
 
 function App() {
   return (
@@ -13,7 +14,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/home" element={<Home />} />
         <Route path="/otp" element={<OtpVerification />} />
-        
+        <Route path="/support" element={<Supportticket/>}/>
         
 
       </Routes>
