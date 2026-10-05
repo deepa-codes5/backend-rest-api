@@ -4,6 +4,8 @@ import Login from "./components/login";
 import Home from "./components/home";
 import OtpVerification from "./components/otpverification";
 import Supportticket from "./components/supportticket";
+import Settings from "./components/settings";
+import Security from "./components/security";
 
 function App() {
   return (
@@ -15,6 +17,8 @@ function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/otp" element={<OtpVerification />} />
         <Route path="/support" element={<Supportticket/>}/>
+        <Route path="/settings" element={<Settings/>}/>
+        <Route path="/security" element={<Security/>}/>
         
 
       </Routes>
