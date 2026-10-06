@@ -1,147 +1,319 @@
 
-*{
-    margin: 0;
-     box-sizing: border-box;
-     padding: 0;
-}
-.setting-page{
-  background-color: #17121f;
-  min-height:100vh;
-  padding: 40px;
-  
-}
-.setting-header{
-    color:white;
-    padding: 30px;
-}
-.setting-header h1{
-    margin-bottom: 12px;    
-}
-.setting-container{
-    display: flex;
-    justify-content: start;
-    gap: 30px;
-    padding: 13px;
-    margin-left: 30px;
-    border: 1px solid #51445f;
-    border-radius: 12px;
-    background-color: #211a2b;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-}
-   
-.setting-container button{
-    height: 50px;
-    width: 200px;
-    padding: 2px;
-    border-radius: 10px ;
-    border: none;
-       background: linear-gradient(
-    135deg,
-    #f43f5e,
-    #f97316
-  );
-    
-  color: white;
-  
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-.setting-container button:hover{
-  
-    transform: translateY(-3px);
-   box-shadow:
-    0 12px 25px rgba(244, 63, 94, 0.3);
-}
-.setting-container button:active {
-  transform: translateY(0);
-}
-.security-list{
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    margin-top: 30px;
-}
-
-.security-row{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    padding: 20px 24px;
-    background-color: #211a2b;
-    border: 1px solid #51445f;
-    border-radius: 12px;
-}
-
-.security-text h3{
-    font-size: 15px;
-    font-weight: 600;
+.setting-page {
+    min-height: 100vh;
+    background: #17121f;
     color: white;
-    margin-bottom: 4px;
+    padding: 40px;
+     box-sizing: border-box;
 }
 
-.security-text p{
+.setting-header h1 {
+    margin: 0 0 8px;
+    font-size: 30px;
+    text-transform: capitalize;
+}
+
+.setting-header p {
+    color: #aaa4b2;
+    font-size: 14px;
+}
+
+.security-list {
+    max-width: 850px;
+    margin-left: 30px;
+    margin-top: 24px;   
+    box-sizing: border-box;
+}
+
+.security-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 22px 28px;
+    margin: 0 0 15px 0;
+    box-sizing: border-box;
+
+    background: #211b2a;
+    border: 1px solid #30283a;
+    border-radius: 12px;
+}
+
+.security-text h3 {
+    margin: 0 0 6px;
+    font-size: 16px;
+}
+
+.security-text p {
+    margin: 0;
+    color: #aaa4b2;
     font-size: 13px;
-    color: #a8a0b5;
 }
 
-/* toggle switch */
-.toggle{
-    position: relative;
-    flex-shrink: 0;
+.toggle {
     width: 48px;
     height: 26px;
-    padding: 0;
+
     border: none;
-    border-radius: 999px;
-    background-color: #51445f;
+    border-radius: 20px;
+
+    background: #4a4352;
+    padding: 3px;
+
     cursor: pointer;
-    transition: background-color 0.25s ease;
+
+    position: relative;
 }
 
-.toggle.on{
-    background: linear-gradient(135deg, #f43f5e, #f97316);
+.toggle.on {
+    background: #f43f5e;
 }
 
-.toggle-knob{
+.toggle-knob {
+    width: 20px;
+    height: 20px;
+
+    background: white;
+    border-radius: 50%;
+
     position: absolute;
     top: 3px;
     left: 3px;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background-color: white;
-    transition: transform 0.25s ease;
 }
 
-.toggle.on .toggle-knob{
-    transform: translateX(22px);
+.toggle.on .toggle-knob {
+    left: 25px;
 }
 
-.toggle:focus-visible,
-.change-btn:focus-visible{
-    outline: 2px solid #f97316;
-    outline-offset: 2px;
-}
 
-/* change button */
-.change-btn{
-    flex-shrink: 0;
-    height: 38px;
-    padding: 0 22px;
-    background: transparent;
-    border: 1px solid #51445f;
-    border-radius: 999px;
+/* Change button */
+
+.change-btn {
+    padding: 9px 18px;
+    border: none;
+    border-radius: 7px;
+    background: #30283a;
     color: white;
-    font-family: inherit;
-    font-size: 14px;
     cursor: pointer;
-    transition: border-color 0.2s ease, color 0.2s ease;
 }
 
-.change-btn:hover{
-    border-color: #f97316;
-    color: #f97316;
+
+
+
+.twofa-modal {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background: rgba(0, 0, 0, 0.65);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 1000;
+}
+
+
+.twofa-box {
+    width: 420px;
+    max-width: 90%;
+
+    background: #211b2a;
+    border: 1px solid #382f43;
+
+    border-radius: 14px;
+
+    padding: 28px;
+
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.45);
+
+    color: white;
+}
+
+.twofa-box h2 {
+    margin: 0 0 10px;
+    font-size: 22px;
+}
+
+.twofa-box p {
+    margin-bottom: 22px;
+
+    color: #aaa4b2;
+
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+
+/* QR section */
+
+.qr-section {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+
+    margin-bottom: 22px;
+}
+
+.qr-placeholder {
+    width: 110px;
+    height: 110px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: white;
+    color: #17121f;
+
+    border-radius: 8px;
+
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.secret-section {
+    flex: 1;
+}
+
+.secret-section label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-size: 13px;
+    color: #aaa4b2;
+}
+
+.secret-key {
+    background: #17121f;
+
+    border: 1px solid #3a3144;
+
+    padding: 10px;
+
+    border-radius: 7px;
+
+    font-size: 12px;
+    color: #ddd;
+}
+
+
+/* Authenticator code */
+
+.code-label {
+    display: block;
+
+    margin-bottom: 10px;
+
+    font-size: 13px;
+    color: #aaa4b2;
+}
+
+.otp-boxes {
+    display: flex;
+    gap: 8px;
+
+    margin-bottom: 25px;
+}
+
+.otp-boxes input {
+    width: 42px;
+    height: 44px;
+
+    text-align: center;
+
+    background: #17121f;
+
+    border: 1px solid #3a3144;
+
+    border-radius: 7px;
+
+    color: white;
+
+    font-size: 18px;
+
+    outline: none;
+}
+
+.otp-boxes input:focus {
+    border-color: #f43f5e;
+}
+
+
+/* Popup buttons */
+
+.twofa-actions {
+    display: flex;
+    justify-content: flex-end;
+
+    gap: 10px;
+}
+
+
+/* Cancel */
+
+.cancel-btn {
+    padding: 10px 18px;
+
+    background: transparent;
+
+    border: 1px solid #4a4352;
+
+    border-radius: 8px;
+
+    color: white;
+
+    cursor: pointer;
+}
+
+.cancel-btn:hover {
+    background: #30283a;
+}
+
+
+/* Enable */
+
+.enable-btn {
+    padding: 10px 18px;
+
+    background: #f43f5e;
+
+    border: none;
+
+    border-radius: 8px;
+
+    color: white;
+
+    cursor: pointer;
+}
+
+.enable-btn:hover {
+    background: #e11d48;
+}
+
+
+/* Disable */
+
+.disable-btn {
+    padding: 10px 18px;
+
+    background: #ef4444;
+
+    border: none;
+
+    border-radius: 8px;
+
+    color: white;
+
+    cursor: pointer;
+}
+
+.disable-btn:hover {
+    background: #dc2626;
 }
