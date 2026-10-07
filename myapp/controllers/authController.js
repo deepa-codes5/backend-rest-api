@@ -132,11 +132,66 @@ const deleteUserByAdmin = async (req, res) => {
 
     }
 };
+const enable2FA = async (req, res) => {
+    try {
+        console.log("USER FROM TOKEN:", req.user);
+        const student = await Student.findById(req.user.id);
+
+        if (!student) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+
+        student.twoFactorEnabled = true;
+
+        await student.save();
+
+        res.status(200).json({
+            message: "2FA enabled successfully"
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            message: "Failed to enable 2FA",
+            error: error.message
+        });
+    }
+};
+
+
+const disable2FA = async (req, res) => {
+    try {
+        const student = await Student.findById(req.user.id);
+
+        if (!student) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+
+        student.twoFactorEnabled = false;
+
+        await student.save();
+
+        res.status(200).json({
+            message: "2FA disabled successfully"
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            message: "Failed to disable 2FA",
+            error: error.message
+        });
+    }
+};
 module.exports = {
     getUserById,
     editUserById,
     deleteUserById,
     getAllUsers,
     editUserByAdmin,
-    deleteUserByAdmin
+    deleteUserByAdmin,
+    enable2FA,
+    disable2FA
 };
