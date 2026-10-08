@@ -1,57 +1,90 @@
-
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./otpverification.css";
 import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function OTPVerification() {
+    const [email, setEmail] = useState("");
+    const [otp, setOtp] = useState("");
 
+    const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
+    const handleVerifyOTP = async () => {
+        if (!email || !otp) {
+            toast.error("Please enter email and OTP");
+            return;
+        }
 
- 
-  return (
-    <div className="otp-container">
+        try {
+            const response = await fetch("http://localhost:5000/verify-otp", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: email,
+                    otp: otp
+                })
+            });
 
-      <div className="otp-box">
+            const data = await response.json();
 
-        <h1>Verify OTP</h1>
+            console.log("OTP response:", data);
 
-        <p>Enter the OTP sent to your email</p>
+            if (!response.ok) {
+                throw new Error(data.message || "OTP verification failed");
+            }
 
-        <input
-          type="email"
-          value={email}
-          placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
-        />
+            toast.success(data.message || "OTP verified successfully");
 
-        <input
-          type="text"
-          value={otp}
-          placeholder="Enter OTP"
-          onChange={(e) => setOtp(e.target.value)}
-        />
+            setTimeout(() => {
+                navigate("/login");
+            }, 1000);
 
-        <button onClick={()=>{
-          if(!email || !otp){
-            toast.error("please enter the empty filed")
-            return
-          }
-          toast.success("otp send to email")
-        }}>
-          Verify OTP
-        </button>
-        <ToastContainer/>
+        } catch (error) {
+            console.log("OTP error:", error);
+            toast.error(error.message);
+        }
+    };
 
-        <p className="resend-text">
-          Didn't receive OTP? <span>Resend OTP</span>
-        </p>
+    return (
+        <div className="otp-container">
 
-      </div>
+            <div className="otp-box">
 
-    </div>
-  );
+                <h1>Verify OTP</h1>
+
+                <p>Enter the OTP sent to your email</p>
+
+                <input
+                    type="email"
+                    value={email}
+                    placeholder="Email"
+                    onChange={(e) => setEmail(e.target.value)}
+                />
+
+                <input
+                    type="text"
+                    value={otp}
+                    placeholder="Enter OTP"
+                    onChange={(e) => setOtp(e.target.value)}
+                />
+
+                <button onClick={handleVerifyOTP}>
+                    Verify OTP
+                </button>
+
+                <ToastContainer />
+
+                <p className="resend-text">
+                    Didn't receive OTP? <span>Resend OTP</span>
+                </p>
+
+            </div>
+
+        </div>
+    );
 }
 
 export default OTPVerification;

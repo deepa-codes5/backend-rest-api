@@ -1,79 +1,130 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./register.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-
 function Register() {
-  const [name, setName] = useState("deepa");
-  const [email, setEmail] = useState("");
-  const [mobilenumber, setMobilenumber] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [mobilenumber, setMobilenumber] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
 
-  return (
-    <div className="register-container">
+    const navigate = useNavigate();
 
-      <div className="register-box">
+    const handleRegister = async () => {
+        if (
+            !name ||
+            !email ||
+            !mobilenumber ||
+            !password ||
+            !confirmPassword
+        ) {
+            toast.error("Please enter all fields");
+            return;
+        }
 
-        <h1>Register</h1>
+        if (password !== confirmPassword) {
+            toast.error("Passwords do not match");
+            return;
+        }
 
-        <input
-          type="text"
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+        try {
+            const response = await fetch("http://localhost:5000/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    name: name,
+                    email: email,
+                    mobileNumber: mobilenumber,
+                    password: password
+                })
+            });
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+            const data = await response.json();
 
-        <input
-          type="text"
-          placeholder="Mobile Number"
-          value={mobilenumber}
-          onChange={(e) => setMobilenumber(e.target.value)}
-        />
+            console.log("Register response:", data);
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+            if (!response.ok) {
+                throw new Error(data.message || "Registration failed");
+            }
 
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-        />
+            toast.success("Registered successfully");
 
-        <button onClick={()=> {
-          if (!name|| !email|| !mobilenumber||!password|| !confirmPassword){
-              toast.error("please enter the empty field")
-              return;
-          }
-              toast.success("Registered successfully")
-        }}>
-          Register
-        </button>
-        <ToastContainer />
+            setTimeout(() => {
+                navigate("/otp", {
+                    state: {
+                        email: email
+                    }
+                });
+            }, 1000);
 
-        <p>
-          Already have an account?{" "}
-          <Link to="/login">Login</Link>
-        </p>
-         
-      </div>
+        } catch (error) {
+            console.log("Register error:", error);
+            toast.error(error.message);
+        }
+    };
 
-    </div>
-  );
+    return (
+        <div className="register-container">
+
+            <div className="register-box">
+
+                <h1>Register</h1>
+
+                <input
+                    type="text"
+                    placeholder="Name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                />
+
+                <input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                />
+
+                <input
+                    type="text"
+                    placeholder="Mobile Number"
+                    value={mobilenumber}
+                    onChange={(e) => setMobilenumber(e.target.value)}
+                />
+
+                <input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                />
+
+                <input
+                    type="password"
+                    placeholder="Confirm Password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+
+                <button onClick={handleRegister}>
+                    Register
+                </button>
+
+                <ToastContainer />
+
+                <p>
+                    Already have an account?{" "}
+                    <Link to="/login">Login</Link>
+                </p>
+
+            </div>
+
+        </div>
+    );
 }
 
 export default Register;

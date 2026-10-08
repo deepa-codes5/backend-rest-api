@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import "./security.css";
 
 function Security() {
+
     const [security, setSecurity] = useState({
         emailNotifications: true,
         twoFactor: false,
@@ -12,6 +13,7 @@ function Security() {
     const [show2FA, setShow2FA] = useState(false);
     const [showDisable2FA, setShowDisable2FA] = useState(false);
 
+
     const handleToggle = (key) => {
         setSecurity({
             ...security,
@@ -19,14 +21,111 @@ function Security() {
         });
     };
 
+
+    
+    const handleEnable2FA = async () => {
+
+        try {
+
+            const token = localStorage.getItem("token");
+
+            const response = await fetch(
+               " http://localhost:5000/studentRoute/2fa/enable",
+                {
+                    method: "PUT",
+
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    }
+                }
+            );
+
+            const data = await response.json();
+
+            console.log("ENABLE 2FA RESPONSE:", data);
+
+
+            if (response.ok) {
+
+                setSecurity({
+                    ...security,
+                    twoFactor: true,
+                });
+
+                setShow2FA(false);
+
+            } else {
+
+                console.log("Enable 2FA failed:", data.message);
+
+            }
+
+        } catch (error) {
+
+            console.log("Enable 2FA error:", error);
+
+        }
+    };
+  
+const handleDisable2FA = async () => {
+
+    try {
+
+        const token = localStorage.getItem("token");
+
+        const response = await fetch(
+            "http://localhost:5000/studentRoute/2fa/disable",
+            {
+                method: "PUT",
+
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+
+        const data = await response.json();
+
+        console.log("DISABLE 2FA RESPONSE:", data);
+
+        if (response.ok) {
+
+            setSecurity({
+                ...security,
+                twoFactor: false,
+            });
+
+            setShowDisable2FA(false);
+
+        } else {
+
+            console.log("Disable 2FA failed:", data.message);
+
+        }
+
+    } catch (error) {
+
+        console.log("Disable 2FA error:", error);
+
+    }
+};
+
+
     return (
         <div className="setting-page">
+
             <div className="setting-header">
+
                 <h1>settings</h1>
+
                 <p>
                     Manage your account, security, MT5, connection and subscription
                 </p>
+
             </div>
+
 
             <div className="setting-container">
 
@@ -40,16 +139,24 @@ function Security() {
 
             </div>
 
+
             <div className="security-list">
+
+
+               
 
                 <div className="security-row">
 
                     <div className="security-text">
+
                         <h3>Email Notifications</h3>
+
                         <p>
                             Receive important updates via email.
                         </p>
+
                     </div>
+
 
                     <button
                         type="button"
@@ -62,22 +169,28 @@ function Security() {
                             handleToggle("emailNotifications")
                         }
                     >
+
                         <span className="toggle-knob"></span>
+
                     </button>
 
                 </div>
 
 
-                {/* 2FA */}
+              
 
                 <div className="security-row">
 
                     <div className="security-text">
+
                         <h3>Two-Factor Authentication (2FA)</h3>
+
                         <p>
                             Add an extra layer of security to your account.
                         </p>
+
                     </div>
+
 
                     <button
                         type="button"
@@ -90,19 +203,21 @@ function Security() {
 
                             if (security.twoFactor) {
 
-                                // ON → OFF
+                               
                                 setShowDisable2FA(true);
 
                             } else {
 
-                                // OFF → ON
+                                
                                 setShow2FA(true);
 
                             }
 
                         }}
                     >
+
                         <span className="toggle-knob"></span>
+
                     </button>
 
                 </div>
@@ -113,9 +228,15 @@ function Security() {
                 <div className="security-row">
 
                     <div className="security-text">
+
                         <h3>Change Password</h3>
-                        <p>Last changed 3 months ago</p>
+
+                        <p>
+                            Last changed 3 months ago
+                        </p>
+
                     </div>
+
 
                     <button
                         type="button"
@@ -129,7 +250,7 @@ function Security() {
             </div>
 
 
-            {/* ENABLE 2FA POPUP */}
+            
 
             {show2FA && (
 
@@ -144,15 +265,19 @@ function Security() {
                             and enter the 6-digit code.
                         </p>
 
+
                         <div className="qr-section">
 
                             <div className="qr-placeholder">
                                 QR CODE
                             </div>
 
+
                             <div className="secret-section">
 
-                                <label>Secret Key</label>
+                                <label>
+                                    Secret Key
+                                </label>
 
                                 <div className="secret-key">
                                     ABCD EFGH IJKL MNOP
@@ -162,9 +287,11 @@ function Security() {
 
                         </div>
 
+
                         <label className="code-label">
                             Authenticator Code
                         </label>
+
 
                         <div className="otp-boxes">
 
@@ -177,27 +304,22 @@ function Security() {
 
                         </div>
 
+
                         <div className="twofa-actions">
 
                             <button
                                 className="cancel-btn"
-                                onClick={() => setShow2FA(false)}
+                                onClick={() =>
+                                    setShow2FA(false)
+                                }
                             >
                                 Cancel
                             </button>
 
+
                             <button
                                 className="enable-btn"
-                                onClick={() => {
-
-                                    setSecurity({
-                                        ...security,
-                                        twoFactor: true,
-                                    });
-
-                                    setShow2FA(false);
-
-                                }}
+                                onClick={handleEnable2FA}
                             >
                                 Enable 2FA
                             </button>
@@ -211,7 +333,7 @@ function Security() {
             )}
 
 
-            {/* DISABLE 2FA POPUP */}
+           
 
             {showDisable2FA && (
 
@@ -226,27 +348,22 @@ function Security() {
                             two-factor authentication.
                         </p>
 
+
                         <div className="twofa-actions">
 
                             <button
                                 className="cancel-btn"
-                                onClick={() => setShowDisable2FA(false)}
+                                onClick={() =>
+                                    setShowDisable2FA(false)
+                                }
                             >
                                 Cancel
                             </button>
 
+
                             <button
                                 className="disable-btn"
-                                onClick={() => {
-
-                                    setSecurity({
-                                        ...security,
-                                        twoFactor: false,
-                                    });
-
-                                    setShowDisable2FA(false);
-
-                                }}
+                               onClick={handleDisable2FA}
                             >
                                 Disable 2FA
                             </button>

@@ -1,8 +1,54 @@
 import "./home.css";
 import { FaUserCircle, FaSearch } from "react-icons/fa";
+import { useEffect,useState} from "react";
 
 function Home() {
+const [student, setStudent] = useState(null); 
+const [loading, setLoading] = useState(true); 
+const [error, setError] = useState("");
+useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        setError("Please login to view your profile.");
+        setLoading(false);
+        return;
+    }
+
+    fetch("http://localhost:5000/studentRoute", {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    })
+        .then(async (response) => {
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message || "Failed to fetch student data"
+                );
+            }
+
+            return data;
+        })
+        .then((data) => {
+            console.log("Student data:", data);
+            setStudent(data.students);
+        })
+        .catch((error) => {
+            console.log("API error:", error);
+            setError(error.message);
+        })
+        .finally(() => {
+            setLoading(false);
+        });
+}, []);
+
+
   return (
+
+
     <div className="home-container">
 
       <header className="navbar">
