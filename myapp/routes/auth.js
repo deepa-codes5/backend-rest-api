@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({ service: "gmail", auth: { user:
 
 router.get('/', (req, res) => {
   res.json({
-    message: 'Auth route working',
+    message: 'hey this is deepa',
   });
 });
 router.get('/register', (req, res) => {
