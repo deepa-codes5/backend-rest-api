@@ -16,6 +16,7 @@ const studentSchema = new mongoose.Schema({
     default: "user"
   },
   isVerified: { type: Boolean, default: false },
+  isBlocked: { type: Boolean, default: false },
 
     twoFactorEnabled: {
         type: Boolean,

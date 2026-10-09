@@ -76,7 +76,7 @@ router.post('/verify-otp', async (req, res) => {
 console.log("FULL STUDENT:", student);
 console.log("DB OTP:", student?.otp);
 
-    // User check
+   
     if (!student) {
       return res.status(404).json({
         message: "User not found"
@@ -90,14 +90,14 @@ console.log("DB OTP:", student?.otp);
       });
     }
 
-    // OTP expiry check
+   
     if (student.otpExpires < new Date()) {
       return res.status(400).json({
         message: "OTP expired"
       });
     }
 
-    // Verification success
+    
     student.isVerified = true;
     student.otp = undefined;
     student.otpExpires = undefined;
@@ -141,6 +141,11 @@ router.post("/login", async (req, res) => {
     });
   }
 
+if (student.isBlocked === true) {
+    return res.status(403).json({
+        message: "Admin blocked your account"
+    });
+}
   const token = jwt.sign(
     {
       id: student._id,
