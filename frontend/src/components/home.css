@@ -237,6 +237,58 @@
 
   line-height: 1.6;
 }
+.wishlist-button {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(251, 113, 133, 0.6);
+  border-radius: 8px;
+  background: transparent;
+  color: #fb7185;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.wishlist-button:hover {
+  background: rgba(251, 113, 133, 0.1);
+}
+.product-image {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+.category-select {
+  padding: 12px 15px;
+  margin-bottom: 25px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #23202d;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+.product-button {
+  width: 100%;
+  padding: 11px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f43f5e, #f97316);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.product-button:hover {
+  opacity: 0.9;
+}
+
+.service-card h4 {
+  color: white;
+  margin: 12px 0;
+}
 
 .about {
   padding: 55px 80px;

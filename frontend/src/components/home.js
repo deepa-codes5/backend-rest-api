@@ -1,51 +1,111 @@
 import "./home.css";
 import { FaUserCircle, FaSearch } from "react-icons/fa";
-import { useEffect,useState} from "react";
+import { useEffect, useState } from "react";
 
 function Home() {
-const [student, setStudent] = useState(null); 
-const [loading, setLoading] = useState(true); 
-const [error, setError] = useState("");
-useEffect(() => {
+  const [student, setStudent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [search, setSearch] = useState("")
+  const [cart, setCart] = useState([]);
+  const [wishlist, setWishlist] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+
+  useEffect(() => {
     const token = localStorage.getItem("token");
 
     if (!token) {
-        setError("Please login to view your profile.");
-        setLoading(false);
-        return;
+      setError("Please login to view your profile.");
+      setLoading(false);
+      return;
     }
 
     fetch("http://localhost:5000/studentRoute", {
-        method: "GET",
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     })
-        .then(async (response) => {
-            const data = await response.json();
+      .then(async (response) => {
+        const data = await response.json();
 
-            if (!response.ok) {
-                throw new Error(
-                    data.message || "Failed to fetch student data"
-                );
-            }
+        if (!response.ok) {
+          throw new Error(
+            data.message || "Failed to fetch student data"
+          );
+        }
 
-            return data;
-        })
-        .then((data) => {
-            console.log("Student data:", data);
-            setStudent(data.students);
-        })
-        .catch((error) => {
-            console.log("API error:", error);
-            setError(error.message);
-        })
-        .finally(() => {
-            setLoading(false);
-        });
-}, []);
+        return data;
+      })
+      .then((data) => {
+        console.log("Student data:", data);
+        setStudent(data.students);
+      })
+      .catch((error) => {
+        console.log("API error:", error);
+        setError(error.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+  const products = [
+    {
+      id: 1,
+      name: "Wireless Headphones",
+      price: 1500,
+      category: "Electronics",
+      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e"
+    },
+    {
+      id: 2,
+      name: "Smart Watch",
+      price: 2500,
+      category: "Accessories",
+      image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30"
+    },
+    {
+      id: 3,
+      name: "Casual Shoes",
+      price: 1800,
+      category: "Fashion",
+      image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff"
+    },
+    {
+      id: 4,
+      name: "Backpack",
+      price: 1200,
+      category: "Accessories",
+      image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62"
+    }
+  ];
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch = product.name
+      .toLowerCase()
+      .includes(search.toLowerCase());
 
+    const matchesCategory =
+      selectedCategory === "All" ||
+      product.category === selectedCategory;
 
+    return matchesSearch && matchesCategory;
+  });
+  const addToCart = (product) => {
+    setCart((previousCart) => [...previousCart, product]);
+  };
+  const toggleWishlist = (product) => {
+    const alreadyAdded = wishlist.some(
+      (item) => item.id === product.id
+    );
+
+    if (alreadyAdded) {
+      setWishlist((previous) =>
+        previous.filter((item) => item.id !== product.id)
+      );
+    } else {
+      setWishlist((previous) => [...previous, product]);
+    }
+  };
   return (
 
 
@@ -60,7 +120,9 @@ useEffect(() => {
         <div className="search-box">
           <input
             type="text"
-            placeholder="Search..."
+            placeholder="Search products..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
           <FaSearch />
         </div>
@@ -69,6 +131,8 @@ useEffect(() => {
           <span>Home</span>
           <span>About</span>
           <span>products</span>
+          <span>Cart ({cart.length})</span>
+          <span>Wishlist ({wishlist.length})</span>
           <FaUserCircle className="profile-icon" />
         </div>
 
@@ -96,34 +160,53 @@ useEffect(() => {
       </section>
 
       <section className="services">
-
-        <h2>Our products</h2>
+        <h2>Our Products</h2>
+        <select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          className="category-select"
+        >
+          <option value="All">All Categories</option>
+          <option value="Electronics">Electronics</option>
+          <option value="Accessories">Accessories</option>
+          <option value="Fashion">Fashion</option>
+        </select>
 
         <div className="service-container">
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((product) => (
+              <div className="service-card" key={product.id}>
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="product-image"
+                />
 
-          <div className="service-card">
-            <h3>Acceseries</h3>
-            <p>
-              afforable and best quality.
-            </p>
-          </div>
+                <h3>{product.name}</h3>
 
-          <div className="service-card">
-            <h3>Dresses</h3>
-            <p>
-              new collection for both men and month.
-            </p>
-          </div>
+                <p>{product.category}</p>
 
-          <div className="service-card">
-            <h3>furniture</h3>
-            <p>
-              best compactable price and oline services.
-            </p>
-          </div>
-
+                <h4>₹{product.price}</h4>
+                <button
+                  className="wishlist-button"
+                  onClick={() => toggleWishlist(product)}
+                >
+                  {wishlist.some((item) => item.id === product.id)
+                    ? "♥ Wishlisted"
+                    : "♡ Add to Wishlist"}
+                </button>
+                <button
+                  className="product-button"
+                  onClick={() => addToCart(product)}
+                >
+                  Add to Cart
+                </button>
+              </div>
+            ))
+          ) : (
+            <p>No products found.</p>
+          )}
         </div>
-
       </section>
 
 
