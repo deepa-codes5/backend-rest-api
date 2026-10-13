@@ -1,8 +1,10 @@
 import "./home.css";
-import { FaUserCircle, FaSearch } from "react-icons/fa";
+import { FaUserCircle, FaSearch, FaHeart } from "react-icons/fa";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Home() {
+  const navigate = useNavigate();
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -107,8 +109,6 @@ function Home() {
     }
   };
   return (
-
-
     <div className="home-container">
 
       <header className="navbar">
@@ -175,26 +175,46 @@ function Home() {
         <div className="service-container">
           {filteredProducts.length > 0 ? (
             filteredProducts.map((product) => (
+
               <div className="service-card" key={product.id}>
+                <button
+                  className={`wishlist-icon ${wishlist.some((item) => item.id === product.id)
+                    ? "active"
+                    : ""
+                    }`}
+                  onClick={() => toggleWishlist(product)}
+                  aria-label="Toggle wishlist"
+                >
+                  <FaHeart />
+                </button>
+
                 <img
                   src={product.image}
                   alt={product.name}
                   className="product-image"
+                  onClick={() =>
+                    navigate(`/product/${product.id}`, {
+                      state: { product }
+                    })
+                  }
+                  style={{ cursor: "pointer" }}
                 />
 
-                <h3>{product.name}</h3>
+                <h3
+  onClick={() =>
+    navigate(`/product/${product.id}`, {
+      state: { product }
+    })
+  }
+  style={{ cursor: "pointer" }}
+>
+  {product.name}
+</h3>
 
                 <p>{product.category}</p>
 
                 <h4>₹{product.price}</h4>
-                <button
-                  className="wishlist-button"
-                  onClick={() => toggleWishlist(product)}
-                >
-                  {wishlist.some((item) => item.id === product.id)
-                    ? "♥ Wishlisted"
-                    : "♡ Add to Wishlist"}
-                </button>
+
                 <button
                   className="product-button"
                   onClick={() => addToCart(product)}

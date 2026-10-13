@@ -237,21 +237,7 @@
 
   line-height: 1.6;
 }
-.wishlist-button {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid rgba(251, 113, 133, 0.6);
-  border-radius: 8px;
-  background: transparent;
-  color: #fb7185;
-  cursor: pointer;
-  font-weight: 600;
-}
 
-.wishlist-button:hover {
-  background: rgba(251, 113, 133, 0.1);
-}
 .product-image {
   width: 100%;
   height: 190px;
@@ -424,4 +410,31 @@
 
     gap: 20px;
   }
+}
+
+.service-card {
+  position: relative;
+}
+
+.wishlist-icon {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: #292431;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.wishlist-icon.active {
+  color: #ff416c;
+  background: white;
 }

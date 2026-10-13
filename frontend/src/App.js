@@ -6,21 +6,21 @@ import OtpVerification from "./components/otpverification";
 import Supportticket from "./components/supportticket";
 import Settings from "./components/settings";
 import Security from "./components/security";
+import ProductDetails from "./components/productdetails";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-         <Route path="/" element={<Register />} />
+        <Route path="/" element={<Register />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/home" element={<Home />} />
         <Route path="/otp" element={<OtpVerification />} />
-        <Route path="/support" element={<Supportticket/>}/>
-        <Route path="/settings" element={<Settings/>}/>
-        <Route path="/security" element={<Security/>}/>
-        
-
+        <Route path="/support" element={<Supportticket />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/security" element={<Security />} />
+        <Route path="/product/:id" element={<ProductDetails />} />
       </Routes>
     </BrowserRouter>
   );
