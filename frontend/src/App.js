@@ -7,6 +7,7 @@ import Supportticket from "./components/supportticket";
 import Settings from "./components/settings";
 import Security from "./components/security";
 import ProductDetails from "./components/productdetails";
+import Cart from "./components/cart";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/security" element={<Security />} />
         <Route path="/product/:id" element={<ProductDetails />} />
+        <Route path="/cart" element={<Cart />} />
       </Routes>
     </BrowserRouter>
   );

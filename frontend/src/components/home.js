@@ -1,3 +1,4 @@
+
 import "./home.css";
 import { FaUserCircle, FaSearch, FaHeart } from "react-icons/fa";
 import { useEffect, useState } from "react";
@@ -5,14 +6,25 @@ import { useNavigate } from "react-router-dom";
 
 function Home() {
   const navigate = useNavigate();
+
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [search, setSearch] = useState("")
-  const [cart, setCart] = useState([]);
+  const [search, setSearch] = useState("");
+
+  // Load cart products from localStorage
+  const [cart, setCart] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("cart") || "[]");
+    } catch {
+      return [];
+    }
+  });
+
   const [wishlist, setWishlist] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
 
+  // Fetch student details
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -25,8 +37,8 @@ function Home() {
     fetch("http://localhost:5000/studentRoute", {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     })
       .then(async (response) => {
         const data = await response.json();
@@ -51,36 +63,44 @@ function Home() {
         setLoading(false);
       });
   }, []);
+
+  // Product list
   const products = [
     {
       id: 1,
       name: "Wireless Headphones",
       price: 1500,
       category: "Electronics",
-      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e"
+      image:
+        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
     },
     {
       id: 2,
       name: "Smart Watch",
       price: 2500,
       category: "Accessories",
-      image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30"
+      image:
+        "https://images.unsplash.com/photo-1523275335684-37898b6baf30",
     },
     {
       id: 3,
       name: "Casual Shoes",
       price: 1800,
       category: "Fashion",
-      image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff"
+      image:
+        "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
     },
     {
       id: 4,
       name: "Backpack",
       price: 1200,
       category: "Accessories",
-      image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62"
-    }
+      image:
+        "https://images.unsplash.com/photo-1553062407-98eeb64c6a62",
+    },
   ];
+
+  // Search and category filter
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name
       .toLowerCase()
@@ -92,9 +112,24 @@ function Home() {
 
     return matchesSearch && matchesCategory;
   });
+
+  // Add product to cart and save it
   const addToCart = (product) => {
-    setCart((previousCart) => [...previousCart, product]);
+    setCart((previousCart) => {
+      const updatedCart = [...previousCart, product];
+
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+      return updatedCart;
+    });
   };
+
+  // Open cart page
+  const openCart = () => {
+    navigate("/cart");
+  };
+
+  // Add or remove product from wishlist
   const toggleWishlist = (product) => {
     const alreadyAdded = wishlist.some(
       (item) => item.id === product.id
@@ -108,14 +143,11 @@ function Home() {
       setWishlist((previous) => [...previous, product]);
     }
   };
+
   return (
     <div className="home-container">
-
       <header className="navbar">
-
-        <div className="logo">
-          MyApp
-        </div>
+        <div className="logo">MyApp</div>
 
         <div className="search-box">
           <input
@@ -130,16 +162,22 @@ function Home() {
         <div className="nav-links">
           <span>Home</span>
           <span>About</span>
-          <span>products</span>
-          <span>Cart ({cart.length})</span>
+          <span>Products</span>
+
+          <span
+            onClick={openCart}
+            style={{ cursor: "pointer" }}
+          >
+            Cart ({cart.length})
+          </span>
+
           <span>Wishlist ({wishlist.length})</span>
+
           <FaUserCircle className="profile-icon" />
         </div>
-
       </header>
 
       <section className="hero">
-
         <div className="hero-content">
           <p className="small-text">WELCOME TO MYAPP</p>
 
@@ -154,13 +192,21 @@ function Home() {
             and enjoy a simple shopping experience.
           </p>
 
-          <button>shop now</button>
+          <button
+            onClick={() =>
+              document.querySelector(".services")?.scrollIntoView({
+                behavior: "smooth",
+              })
+            }
+          >
+            Shop Now
+          </button>
         </div>
-
       </section>
 
       <section className="services">
         <h2>Our Products</h2>
+
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
@@ -175,13 +221,13 @@ function Home() {
         <div className="service-container">
           {filteredProducts.length > 0 ? (
             filteredProducts.map((product) => (
-
               <div className="service-card" key={product.id}>
                 <button
-                  className={`wishlist-icon ${wishlist.some((item) => item.id === product.id)
-                    ? "active"
-                    : ""
-                    }`}
+                  className={`wishlist-icon ${
+                    wishlist.some((item) => item.id === product.id)
+                      ? "active"
+                      : ""
+                  }`}
                   onClick={() => toggleWishlist(product)}
                   aria-label="Toggle wishlist"
                 >
@@ -194,26 +240,26 @@ function Home() {
                   className="product-image"
                   onClick={() =>
                     navigate(`/product/${product.id}`, {
-                      state: { product }
+                      state: { product },
                     })
                   }
                   style={{ cursor: "pointer" }}
                 />
 
                 <h3
-  onClick={() =>
-    navigate(`/product/${product.id}`, {
-      state: { product }
-    })
-  }
-  style={{ cursor: "pointer" }}
->
-  {product.name}
-</h3>
+                  onClick={() =>
+                    navigate(`/product/${product.id}`, {
+                      state: { product },
+                    })
+                  }
+                  style={{ cursor: "pointer" }}
+                >
+                  {product.name}
+                </h3>
 
                 <p>{product.category}</p>
 
-                <h4>₹{product.price}</h4>
+                <h4>₹{product.price.toLocaleString("en-IN")}</h4>
 
                 <button
                   className="product-button"
@@ -229,11 +275,8 @@ function Home() {
         </div>
       </section>
 
-
       <section className="about">
-
         <div className="about-content">
-
           <div>
             <h3>Get to Know Us</h3>
             <p>About MyApp</p>
@@ -266,13 +309,10 @@ function Home() {
             <p>MyApp App Download</p>
             <p>Help</p>
           </div>
-
         </div>
-
       </section>
 
       <footer className="footer">
-
         <div>
           <h3>MyApp</h3>
           <p>Simple. Secure. Easy.</p>
@@ -287,9 +327,7 @@ function Home() {
         <div>
           <p>© 2026 MyApp</p>
         </div>
-
       </footer>
-
     </div>
   );
 }

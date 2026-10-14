@@ -255,20 +255,99 @@
   font-size: 14px;
   cursor: pointer;
 }
+```css
+/* Common button interaction */
+button {
+  cursor: pointer;
+  transition: background 0.25s ease,
+              color 0.25s ease,
+              border-color 0.25s ease,
+              transform 0.2s ease,
+              box-shadow 0.25s ease;
+}
+
+/* Add to Cart button */
 .product-button {
-  width: 100%;
-  padding: 11px;
+  background: linear-gradient(135deg, #f43f5e, #f97316);
+  color: #fff;
   border: none;
   border-radius: 8px;
-  background: linear-gradient(135deg, #f43f5e, #f97316);
-  color: white;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
+  padding: 10px 16px;
 }
 
 .product-button:hover {
-  opacity: 0.9;
+  background: linear-gradient(135deg, #e11d48, #ea580c);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(244, 63, 94, 0.25);
+}
+
+.product-button:active {
+  transform: scale(0.96);
+}
+
+
+.hero-content button:hover {
+  filter: brightness(1.15);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(244, 63, 94, 0.25);
+}
+
+.hero-content button:active {
+  transform: scale(0.97);
+}
+
+
+.wishlist-icon {
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.wishlist-icon:hover {
+  color: #f43f5e;
+  transform: scale(1.12);
+}
+
+.wishlist-icon.active {
+  color: #f43f5e;
+}
+
+
+.nav-links span {
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.nav-links span:hover {
+  color: #f97316;
+}
+
+
+.category-select {
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.category-select:hover,
+.category-select:focus {
+  border-color: #f97316;
+  outline: none;
+}
+
+
+.service-card {
+  transition: border-color 0.25s ease,
+              box-shadow 0.25s ease;
+}
+
+.service-card:hover {
+  border-color: #f43f5e;
+  box-shadow: 0 5px 20px rgba(244, 63, 94, 0.12);
+}
+
+
+button:focus-visible,
+.nav-links span:focus-visible {
+  outline: 2px solid #f97316;
+  outline-offset: 3px;
 }
 
 .service-card h4 {
@@ -368,6 +447,27 @@
   .hero-content h1 {
     font-size: 40px;
   }
+}
+.nav-links span,
+.profile-icon {
+  cursor: pointer;
+}
+
+
+button {
+  cursor: pointer;
+}
+
+
+.product-button,
+.wishlist-icon,
+.service-card img,
+.service-card h3 {
+  cursor: pointer;
+}
+
+.category-select {
+  cursor: pointer;
 }
 
 

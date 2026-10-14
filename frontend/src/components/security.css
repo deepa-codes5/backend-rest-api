@@ -86,7 +86,7 @@
 }
 
 
-/* Change button */
+
 
 .change-btn {
     padding: 9px 18px;
@@ -150,7 +150,6 @@
 }
 
 
-/* QR section */
 
 .qr-section {
     display: flex;
@@ -204,7 +203,6 @@
 }
 
 
-/* Authenticator code */
 
 .code-label {
     display: block;
@@ -246,7 +244,6 @@
 }
 
 
-/* Popup buttons */
 
 .twofa-actions {
     display: flex;
@@ -256,7 +253,7 @@
 }
 
 
-/* Cancel */
+
 
 .cancel-btn {
     padding: 10px 18px;
@@ -277,7 +274,6 @@
 }
 
 
-/* Enable */
 
 .enable-btn {
     padding: 10px 18px;
@@ -298,7 +294,7 @@
 }
 
 
-/* Disable */
+
 
 .disable-btn {
     padding: 10px 18px;
