@@ -8,6 +8,7 @@ import Settings from "./components/settings";
 import Security from "./components/security";
 import ProductDetails from "./components/productdetails";
 import Cart from "./components/cart";
+import Wishlist from "./components/wishlist";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/security" element={<Security />} />
         <Route path="/product/:id" element={<ProductDetails />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/wishlist" element={<Wishlist />} />
       </Routes>
     </BrowserRouter>
   );

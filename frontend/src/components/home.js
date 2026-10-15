@@ -11,20 +11,25 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
-  // Load cart products from localStorage
   const [cart, setCart] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem("cart") || "[]");
+      return JSON.parse(localStorage.getItem("cart")) || [];
     } catch {
       return [];
     }
   });
 
-  const [wishlist, setWishlist] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [wishlist, setWishlist] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("wishlist")) || [];
+    } catch {
+      return [];
+    }
+  });
 
-  // Fetch student details
+  // Fetch student profile
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -52,7 +57,6 @@ function Home() {
         return data;
       })
       .then((data) => {
-        console.log("Student data:", data);
         setStudent(data.students);
       })
       .catch((error) => {
@@ -113,20 +117,12 @@ function Home() {
     return matchesSearch && matchesCategory;
   });
 
-  // Add product to cart and save it
+  // Add product to cart
   const addToCart = (product) => {
-    setCart((previousCart) => {
-      const updatedCart = [...previousCart, product];
+    const updatedCart = [...cart, product];
 
-      localStorage.setItem("cart", JSON.stringify(updatedCart));
-
-      return updatedCart;
-    });
-  };
-
-  // Open cart page
-  const openCart = () => {
-    navigate("/cart");
+    setCart(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
   // Add or remove product from wishlist
@@ -135,13 +131,25 @@ function Home() {
       (item) => item.id === product.id
     );
 
-    if (alreadyAdded) {
-      setWishlist((previous) =>
-        previous.filter((item) => item.id !== product.id)
-      );
-    } else {
-      setWishlist((previous) => [...previous, product]);
-    }
+    const updatedWishlist = alreadyAdded
+      ? wishlist.filter((item) => item.id !== product.id)
+      : [...wishlist, product];
+
+    setWishlist(updatedWishlist);
+    localStorage.setItem(
+      "wishlist",
+      JSON.stringify(updatedWishlist)
+    );
+  };
+
+  // Open cart page
+  const openCart = () => {
+    navigate("/cart");
+  };
+
+  // Open wishlist page
+  const openWishlist = () => {
+    navigate("/wishlist");
   };
 
   return (
@@ -171,7 +179,12 @@ function Home() {
             Cart ({cart.length})
           </span>
 
-          <span>Wishlist ({wishlist.length})</span>
+          <span
+            onClick={openWishlist}
+            style={{ cursor: "pointer" }}
+          >
+            Wishlist ({wishlist.length})
+          </span>
 
           <FaUserCircle className="profile-icon" />
         </div>
@@ -220,55 +233,70 @@ function Home() {
 
         <div className="service-container">
           {filteredProducts.length > 0 ? (
-            filteredProducts.map((product) => (
-              <div className="service-card" key={product.id}>
-                <button
-                  className={`wishlist-icon ${
-                    wishlist.some((item) => item.id === product.id)
-                      ? "active"
-                      : ""
-                  }`}
-                  onClick={() => toggleWishlist(product)}
-                  aria-label="Toggle wishlist"
-                >
-                  <FaHeart />
-                </button>
+            filteredProducts.map((product) => {
+              const isWishlisted = wishlist.some(
+                (item) => item.id === product.id
+              );
 
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="product-image"
-                  onClick={() =>
-                    navigate(`/product/${product.id}`, {
-                      state: { product },
-                    })
-                  }
-                  style={{ cursor: "pointer" }}
-                />
+              return (
+                <div className="service-card" key={product.id}>
+                  <button
+                    className={`wishlist-icon ${
+                      isWishlisted ? "active" : ""
+                    }`}
+                    onClick={() => toggleWishlist(product)}
+                    aria-label={
+                      isWishlisted
+                        ? "Remove from wishlist"
+                        : "Add to wishlist"
+                    }
+                    title={
+                      isWishlisted
+                        ? "Remove from Wishlist"
+                        : "Add to Wishlist"
+                    }
+                  >
+                    <FaHeart />
+                  </button>
 
-                <h3
-                  onClick={() =>
-                    navigate(`/product/${product.id}`, {
-                      state: { product },
-                    })
-                  }
-                  style={{ cursor: "pointer" }}
-                >
-                  {product.name}
-                </h3>
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="product-image"
+                    onClick={() =>
+                      navigate(`/product/${product.id}`, {
+                        state: { product },
+                      })
+                    }
+                    style={{ cursor: "pointer" }}
+                  />
 
-                <p>{product.category}</p>
+                  <h3
+                    onClick={() =>
+                      navigate(`/product/${product.id}`, {
+                        state: { product },
+                      })
+                    }
+                    style={{ cursor: "pointer" }}
+                  >
+                    {product.name}
+                  </h3>
 
-                <h4>₹{product.price.toLocaleString("en-IN")}</h4>
+                  <p>{product.category}</p>
 
-                <button
-                  className="product-button"
-                  onClick={() => addToCart(product)}
-                >
-                  Add to Cart
-                </button>
-              </div>
-            ))
+                  <h4>
+                    ₹{product.price.toLocaleString("en-IN")}
+                  </h4>
+
+                  <button
+                    className="product-button"
+                    onClick={() => addToCart(product)}
+                  >
+                    Add to Cart
+                  </button>
+                </div>
+              );
+            })
           ) : (
             <p>No products found.</p>
           )}

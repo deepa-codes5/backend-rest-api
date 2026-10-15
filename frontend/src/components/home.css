@@ -470,6 +470,35 @@ button {
   cursor: pointer;
 }
 
+.product-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.product-actions .product-button {
+  flex: 1;
+}
+
+.wishlist-button {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #292131;
+  color: #f43f5e;
+  border: 1px solid #49384f;
+  border-radius: 8px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.wishlist-button:hover {
+  background: #3b2639;
+}
+
 
 @media (max-width: 600px) {
 
