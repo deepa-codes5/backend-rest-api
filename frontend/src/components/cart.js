@@ -46,7 +46,7 @@ function Cart() {
         </div>
 
         <div className="cart-layout">
-            
+
 
           <div className="cart-products">
 
@@ -128,12 +128,15 @@ function Cart() {
               <strong>₹{subtotal.toLocaleString("en-IN")}.00</strong>
             </div>
 
+
             <button
               className="checkout-button"
               disabled={cart.length === 0}
+              onClick={() => navigate("/checkout")}
             >
               CHECK OUT
             </button>
+
 
             <p className="checkout-note">
               Taxes and shipping calculated at checkout
