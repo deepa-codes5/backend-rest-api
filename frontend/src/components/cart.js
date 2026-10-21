@@ -96,7 +96,7 @@ function Cart() {
                 <div className="empty-cart-icon">🛒</div>
                 <h3>Your cart is empty</h3>
                 <p>Add products from the Home page.</p>
-                <button onClick={() => navigate("/")}>
+                <button onClick={() => navigate("/home")}>
                   SHOP PRODUCTS
                 </button>
               </div>
@@ -132,9 +132,9 @@ function Cart() {
             <button
               className="checkout-button"
               disabled={cart.length === 0}
-              onClick={() => navigate("/checkout")}
+              onClick={() => navigate("/order-review")}
             >
-              CHECK OUT
+              REVIEW PAGE
             </button>
 
 

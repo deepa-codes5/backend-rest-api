@@ -161,9 +161,6 @@
     0 0 18px rgba(251, 113, 133, 0.25);
 }
 
-
-
-
 .login-box button {
   width: 100%;
 
@@ -202,8 +199,6 @@
 .login-box button:active {
   transform: translateY(0);
 }
-
-
 
 .login-box p {
   margin-top: 22px;

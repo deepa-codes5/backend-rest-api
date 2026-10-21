@@ -29,7 +29,7 @@ function Home() {
     }
   });
 
-  // Fetch student profile
+  
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -68,7 +68,7 @@ function Home() {
       });
   }, []);
 
-  // Product list
+
   const products = [
     {
       id: 1,
@@ -104,7 +104,7 @@ function Home() {
     },
   ];
 
-  // Search and category filter
+ 
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name
       .toLowerCase()
@@ -117,7 +117,7 @@ function Home() {
     return matchesSearch && matchesCategory;
   });
 
-  // Add product to cart
+ 
   const addToCart = (product) => {
     const updatedCart = [...cart, product];
 
@@ -125,7 +125,7 @@ function Home() {
     localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
-  // Add or remove product from wishlist
+ 
   const toggleWishlist = (product) => {
     const alreadyAdded = wishlist.some(
       (item) => item.id === product.id
@@ -142,12 +142,12 @@ function Home() {
     );
   };
 
-  // Open cart page
+ 
   const openCart = () => {
     navigate("/cart");
   };
 
-  // Open wishlist page
+  
   const openWishlist = () => {
     navigate("/wishlist");
   };
