@@ -12,6 +12,8 @@ import Wishlist from "./components/wishlist";
 import Checkout from "./components/checkout";
 import OrderReview from "./components/review";
 
+import PaymentMethod from "./components/payment";
+
 function App() {
   return (
     <BrowserRouter>
@@ -29,6 +31,7 @@ function App() {
         <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/order-review" element={<OrderReview />} />
          <Route path="/checkout" element={<Checkout />} />
+         <Route path="/payment-method" element={<PaymentMethod />}/>
 
       </Routes>
     </BrowserRouter>

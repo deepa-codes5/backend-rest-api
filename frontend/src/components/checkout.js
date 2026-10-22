@@ -59,9 +59,9 @@ function Checkout() {
       previous.map((item, i) =>
         i === index
           ? {
-              ...item,
-              quantity: Math.max(1, item.quantity + change),
-            }
+            ...item,
+            quantity: Math.max(1, item.quantity + change),
+          }
           : item
       )
     );
@@ -293,9 +293,9 @@ function Checkout() {
           <button
             type="button"
             className="checkout-continue-btn"
-            onClick={continueToAddress}
+            onClick={() => navigate("/payment-method")}
           >
-            Continue to Shipping Address <FaArrowRight />
+            Continue to PaymentMethod <FaArrowRight />
           </button>
 
           <p className="checkout-secure-note">
