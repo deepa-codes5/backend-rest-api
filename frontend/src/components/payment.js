@@ -6,18 +6,22 @@ import { useNavigate } from "react-router-dom";
 function PaymentMethod() {
   const navigate = useNavigate();
 
-  // Read existing cart data
+  // Read cart from localStorage
   const [cart] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem("cart")) || [];
+      const savedCart = JSON.parse(localStorage.getItem("cart"));
+      return Array.isArray(savedCart) ? savedCart : [];
     } catch {
       return [];
     }
   });
 
+  // Read checkout summary from localStorage
   const [summary] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem("checkoutSummary")) || {};
+      return (
+        JSON.parse(localStorage.getItem("checkoutSummary")) || {}
+      );
     } catch {
       return {};
     }
@@ -34,33 +38,56 @@ function PaymentMethod() {
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState(null);
 
-  const subtotal = Number(
-    summary.subtotal ??
-      cart.reduce(
-        (total, item) =>
-          total +
-          Number(item.price || 0) * Number(item.quantity || 1),
-        0
-      )
+  // Calculate subtotal from current cart items
+  const subtotal = cart.reduce((sum, item) => {
+    const price = Math.max(0, Number(item.price) || 0);
+    const quantity = Math.max(
+      1,
+      Number(item.quantity) || 1
+    );
+
+    return sum + price * quantity;
+  }, 0);
+
+  // Read shipping and discount values
+  const shipping = Math.max(
+    0,
+    Number(summary.shipping) || 0
   );
 
-  const shipping = Number(summary.shipping ?? 0);
-  const discount = Number(summary.discount ?? 0);
-  const total = Number(
-    summary.total ?? subtotal + shipping - discount
+  const discount = Math.min(
+    subtotal,
+    Math.max(0, Number(summary.discount) || 0)
   );
+
+  // Always calculate the final total
+  const total = Math.max(
+    0,
+    subtotal + shipping - discount
+  );
+
+  // Format price in Indian currency format
+  const formatPrice = (price) =>
+    Number(price || 0).toLocaleString("en-IN", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
 
   const handlePayment = (event) => {
     event.preventDefault();
     setError("");
 
     if (cart.length === 0) {
-      setError("Your cart is empty. Please add products first.");
+      setError(
+        "Your cart is empty. Please add products first."
+      );
       return;
     }
 
     if (!Number.isFinite(total) || total <= 0) {
-      setError("Invalid order amount. Please check your checkout.");
+      setError(
+        "Invalid order amount. Please check your checkout."
+      );
       return;
     }
 
@@ -69,8 +96,10 @@ function PaymentMethod() {
       return;
     }
 
+    // UPI validation
     if (paymentMethod === "UPI") {
-      const upiPattern = /^[a-zA-Z0-9._-]{2,}@[a-zA-Z0-9.-]+$/;
+      const upiPattern =
+        /^[a-zA-Z0-9._-]{2,}@[a-zA-Z0-9.-]+$/;
 
       if (!upiId.trim()) {
         setError("Please enter your UPI ID.");
@@ -78,14 +107,19 @@ function PaymentMethod() {
       }
 
       if (!upiPattern.test(upiId.trim())) {
-        setError("Please enter a valid UPI ID format.");
+        setError(
+          "Please enter a valid UPI ID format."
+        );
         return;
       }
     }
 
+    // Card validation
     if (paymentMethod === "CARD") {
       if (!cardName.trim()) {
-        setError("Please enter the cardholder name.");
+        setError(
+          "Please enter the cardholder name."
+        );
         return;
       }
 
@@ -120,16 +154,23 @@ function PaymentMethod() {
 
     setProcessing(true);
 
-
     setTimeout(() => {
       const order = {
         orderId: `DEMO-${Date.now()}`,
+        products: cart,
         items: cart,
+        subtotal,
+        shipping,
+        discount,
         totalAmount: total,
         paymentMethod,
         paymentStatus:
-          paymentMethod === "COD" ? "Pending" : "Paid (Simulated)",
+          paymentMethod === "COD"
+            ? "Pending"
+            : "Paid (Simulated)",
         orderStatus: "Placed",
+        currentStep: 0,
+        date: new Date().toLocaleDateString("en-IN"),
         createdAt: new Date().toISOString()
       };
 
@@ -139,7 +180,22 @@ function PaymentMethod() {
           JSON.stringify(order)
         );
 
-        // Store the method only, never the card details.
+        // Save order for order tracking
+        const savedOrders = JSON.parse(
+          localStorage.getItem("orders") || "[]"
+        );
+
+        const orders = Array.isArray(savedOrders)
+          ? savedOrders
+          : [];
+
+        orders.push(order);
+
+        localStorage.setItem(
+          "orders",
+          JSON.stringify(orders)
+        );
+
         localStorage.setItem(
           "selectedPaymentMethod",
           paymentMethod
@@ -147,13 +203,16 @@ function PaymentMethod() {
 
         setResult(order);
       } catch {
-        setError("Unable to save the practice order.");
+        setError(
+          "Unable to save the practice order."
+        );
       }
 
       setProcessing(false);
     }, 900);
   };
 
+  // Payment success screen
   if (result) {
     return (
       <div className="payment-page">
@@ -179,7 +238,7 @@ function PaymentMethod() {
           </p>
 
           <p>
-            Total: <strong>₹{total.toFixed(2)}</strong>
+            Total: <strong>₹{formatPrice(result.totalAmount)}</strong>
           </p>
 
           <p>
@@ -187,6 +246,7 @@ function PaymentMethod() {
           </p>
 
           <button
+            type="button"
             className="payment-primary-btn"
             onClick={() => navigate("/home")}
           >
@@ -295,7 +355,9 @@ function PaymentMethod() {
                 type="text"
                 placeholder="yourname@bank"
                 value={upiId}
-                onChange={(event) => setUpiId(event.target.value)}
+                onChange={(event) =>
+                  setUpiId(event.target.value)
+                }
               />
 
               <small>
@@ -306,17 +368,23 @@ function PaymentMethod() {
 
           {paymentMethod === "CARD" && (
             <div className="payment-form-fields">
-              <label htmlFor="cardName">Cardholder Name</label>
+              <label htmlFor="cardName">
+                Cardholder Name
+              </label>
 
               <input
                 id="cardName"
                 type="text"
                 placeholder="Name on card"
                 value={cardName}
-                onChange={(event) => setCardName(event.target.value)}
+                onChange={(event) =>
+                  setCardName(event.target.value)
+                }
               />
 
-              <label htmlFor="cardNumber">Card Number</label>
+              <label htmlFor="cardNumber">
+                Card Number
+              </label>
 
               <input
                 id="cardNumber"
@@ -327,14 +395,18 @@ function PaymentMethod() {
                 value={cardNumber}
                 onChange={(event) =>
                   setCardNumber(
-                    event.target.value.replace(/\D/g, "").slice(0, 16)
+                    event.target.value
+                      .replace(/\D/g, "")
+                      .slice(0, 16)
                   )
                 }
               />
 
               <div className="payment-card-row">
                 <div>
-                  <label htmlFor="expiry">Expiry (MM/YY)</label>
+                  <label htmlFor="expiry">
+                    Expiry (MM/YY)
+                  </label>
 
                   <input
                     id="expiry"
@@ -349,7 +421,9 @@ function PaymentMethod() {
 
                       if (value.length > 2) {
                         value =
-                          value.slice(0, 2) + "/" + value.slice(2);
+                          value.slice(0, 2) +
+                          "/" +
+                          value.slice(2);
                       }
 
                       setExpiry(value);
@@ -369,7 +443,9 @@ function PaymentMethod() {
                     value={cvv}
                     onChange={(event) =>
                       setCvv(
-                        event.target.value.replace(/\D/g, "").slice(0, 4)
+                        event.target.value
+                          .replace(/\D/g, "")
+                          .slice(0, 4)
                       )
                     }
                   />
@@ -407,7 +483,7 @@ function PaymentMethod() {
               ? "Processing demo..."
               : paymentMethod === "COD"
                 ? "Place Order"
-                : `Pay ₹${total.toFixed(2)}`}
+                : `Pay ₹${formatPrice(total)}`}
           </button>
 
           <p className="payment-demo-note">
@@ -418,46 +494,57 @@ function PaymentMethod() {
         <aside className="payment-summary">
           <h2>Order Summary</h2>
 
-          {cart.map((item, index) => (
-            <div
-              className="payment-summary-item"
-              key={item.id ?? index}
-            >
-              <div>
-                <strong>{item.name}</strong>
-                <small>
-                  Qty: {Number(item.quantity || 1)}
-                </small>
-              </div>
+          {cart.map((item, index) => {
+            const price = Math.max(
+              0,
+              Number(item.price) || 0
+            );
 
-              <span>
-                ₹
-                {(
-                  Number(item.price || 0) *
-                  Number(item.quantity || 1)
-                ).toFixed(2)}
-              </span>
-            </div>
-          ))}
+            const quantity = Math.max(
+              1,
+              Number(item.quantity) || 1
+            );
+
+            return (
+              <div
+                className="payment-summary-item"
+                key={item.id ?? item._id ?? index}
+              >
+                <div>
+                  <strong>
+                    {item.name || item.productName || "Product"}
+                  </strong>
+
+                  <small>
+                    ₹{formatPrice(price)} × {quantity}
+                  </small>
+                </div>
+
+                <span>
+                  ₹{formatPrice(price * quantity)}
+                </span>
+              </div>
+            );
+          })}
 
           <div className="payment-summary-row">
             <span>Subtotal</span>
-            <span>₹{subtotal.toFixed(2)}</span>
+            <span>₹{formatPrice(subtotal)}</span>
           </div>
 
           <div className="payment-summary-row">
             <span>Shipping</span>
-            <span>₹{shipping.toFixed(2)}</span>
+            <span>₹{formatPrice(shipping)}</span>
           </div>
 
           <div className="payment-summary-row">
             <span>Discount</span>
-            <span>-₹{discount.toFixed(2)}</span>
+            <span>-₹{formatPrice(discount)}</span>
           </div>
 
           <div className="payment-summary-total">
             <strong>Total</strong>
-            <strong>₹{total.toFixed(2)}</strong>
+            <strong>₹{formatPrice(total)}</strong>
           </div>
         </aside>
       </div>

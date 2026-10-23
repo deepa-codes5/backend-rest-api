@@ -13,7 +13,7 @@
   background: #17121f;
 }
 
-/* Animated background glow */
+
 
 .register-container::before {
   content: "";
@@ -88,7 +88,7 @@
 }
 
 
-/* Heading */
+
 
 .register-box h1 {
   margin: 0 0 30px;
@@ -120,7 +120,7 @@
 }
 
 
-/* Inputs */
+
 
 .register-box input {
   width: 100%;
@@ -162,8 +162,6 @@
 }
 
 
-/* Button */
-
 .register-box button {
   width: 100%;
 
@@ -204,7 +202,6 @@
 }
 
 
-/* Login text */
 
 .register-box p {
   margin-top: 22px;
@@ -231,9 +228,6 @@
 }
 
 
-/* =====================
-   Animations
-   ===================== */
 
 @keyframes cardEnter {
   from {
