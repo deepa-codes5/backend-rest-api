@@ -29,7 +29,7 @@ function Home() {
     }
   });
 
-  
+
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -104,7 +104,7 @@ function Home() {
     },
   ];
 
- 
+
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name
       .toLowerCase()
@@ -117,7 +117,7 @@ function Home() {
     return matchesSearch && matchesCategory;
   });
 
- 
+
   const addToCart = (product) => {
     const updatedCart = [...cart, product];
 
@@ -125,7 +125,7 @@ function Home() {
     localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
- 
+
   const toggleWishlist = (product) => {
     const alreadyAdded = wishlist.some(
       (item) => item.id === product.id
@@ -142,12 +142,12 @@ function Home() {
     );
   };
 
- 
+
   const openCart = () => {
     navigate("/cart");
   };
 
-  
+
   const openWishlist = () => {
     navigate("/wishlist");
   };
@@ -186,7 +186,14 @@ function Home() {
             Wishlist ({wishlist.length})
           </span>
 
-          <FaUserCircle className="profile-icon" />
+
+          <FaUserCircle
+            className="profile-icon"
+            onClick={() => navigate("/profile")}
+            style={{ cursor: "pointer" }}
+            title="My Profile"
+          />
+
         </div>
       </header>
 
@@ -241,9 +248,8 @@ function Home() {
               return (
                 <div className="service-card" key={product.id}>
                   <button
-                    className={`wishlist-icon ${
-                      isWishlisted ? "active" : ""
-                    }`}
+                    className={`wishlist-icon ${isWishlisted ? "active" : ""
+                      }`}
                     onClick={() => toggleWishlist(product)}
                     aria-label={
                       isWishlisted

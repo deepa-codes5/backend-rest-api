@@ -12,7 +12,7 @@ import Wishlist from "./components/wishlist";
 import Checkout from "./components/checkout";
 import OrderReview from "./components/review";
 import OrderTracking from "./components/tracking";
-
+import UserProfile from "./components/userprofile";
 import PaymentMethod from "./components/payment";
 
 function App() {
@@ -27,6 +27,7 @@ function App() {
         <Route path="/support" element={<Supportticket />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/security" element={<Security />} />
+        <Route path="/profile" element={<UserProfile />} />
         <Route path="/product/:id" element={<ProductDetails />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/wishlist" element={<Wishlist />} />

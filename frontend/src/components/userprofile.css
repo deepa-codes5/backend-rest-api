@@ -1,0 +1,485 @@
+
+.userprofile-page {
+  min-height: 100vh;
+  width: 100%;
+  background: #15101b;
+  color: #f5f5f5;
+  font-family: Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+.userprofile-topbar {
+  min-height: 70px;
+  padding: 15px 5%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid #302438;
+  box-sizing: border-box;
+}
+
+.userprofile-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 14px;
+  background: #211a2a;
+  color: #f5f5f5;
+  border: 1px solid #493650;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.userprofile-back:hover {
+  border-color: #ff7417;
+  color: #ff9a55;
+}
+
+.userprofile-brand {
+  color: #fb923c;
+  font-size: 23px;
+  font-weight: 700;
+}
+
+.userprofile-main {
+  width: 100%;
+  max-width: 1050px;
+  margin: 0 auto;
+  padding: 32px 24px 45px;
+  box-sizing: border-box;
+}
+
+.userprofile-title {
+  margin-bottom: 25px;
+}
+
+.userprofile-title h1 {
+  margin: 0 0 9px;
+  font-size: 30px;
+}
+
+.userprofile-title p {
+  margin: 0;
+  color: #b9afc3;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.userprofile-card {
+  background: #1d1626;
+  border: 1px solid #392a45;
+  border-radius: 12px;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.userprofile-personal {
+  margin-bottom: 32px;
+}
+
+.userprofile-personal-top {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  flex-wrap: wrap;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #392a45;
+}
+
+.userprofile-avatar-wrap {
+  width: 75px;
+  height: 75px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #302038;
+}
+
+.userprofile-avatar {
+  font-size: 58px;
+  color: #f97316;
+}
+
+.userprofile-intro {
+  flex: 1;
+  min-width: 160px;
+}
+
+.userprofile-eyebrow {
+  color: #fb923c;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+
+.userprofile-intro h2 {
+  margin: 7px 0;
+  font-size: 22px;
+  overflow-wrap: anywhere;
+}
+
+.userprofile-intro p {
+  margin: 0;
+  color: #b9afc3;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.userprofile-edit-btn,
+.userprofile-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 11px 17px;
+  background: linear-gradient(135deg, #f43f5e, #f97316);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.userprofile-edit-btn:hover,
+.userprofile-primary:hover {
+  opacity: 0.9;
+}
+
+.userprofile-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  padding-top: 24px;
+}
+
+.userprofile-info-item {
+  min-width: 0;
+}
+
+.userprofile-info-item span {
+  display: block;
+  margin-bottom: 9px;
+  color: #b9afc3;
+  font-size: 12px;
+}
+
+.userprofile-info-item strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.userprofile-section {
+  margin-bottom: 32px;
+}
+
+.userprofile-section > h2 {
+  margin: 0 0 16px;
+  font-size: 20px;
+}
+
+.userprofile-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.userprofile-menu-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-width: 0;
+  min-height: 91px;
+  padding: 17px;
+  text-align: left;
+  background: #1d1626;
+  color: #f5f5f5;
+  border: 1px solid #392a45;
+  border-radius: 10px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.userprofile-menu-card:hover {
+  border-color: #f97316;
+  background: #241a2e;
+}
+
+.userprofile-menu-icon {
+  width: 43px;
+  height: 43px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 9px;
+  background: #302038;
+  color: #fb923c;
+  font-size: 19px;
+}
+
+.userprofile-menu-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.userprofile-menu-text strong {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 14px;
+}
+
+.userprofile-menu-text small {
+  display: block;
+  color: #b9afc3;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.userprofile-chevron {
+  flex-shrink: 0;
+  color: #94849e;
+  font-size: 12px;
+}
+
+.userprofile-address-card {
+  padding: 22px;
+}
+
+.userprofile-address-heading {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.userprofile-address-heading h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.userprofile-address-heading p {
+  margin: 0;
+  color: #b9afc3;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.userprofile-address-text {
+  margin: 20px 0;
+  color: #e5dce9;
+  font-size: 14px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.userprofile-address-actions,
+.userprofile-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.userprofile-secondary,
+.userprofile-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 15px;
+  background: #211a2a;
+  color: #f5f5f5;
+  border: 1px solid #493650;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.userprofile-secondary:hover {
+  border-color: #f97316;
+  color: #ff9a55;
+}
+
+.userprofile-delete-btn {
+  color: #fb7185;
+  border-color: #61313f;
+}
+
+.userprofile-delete-btn:hover {
+  border-color: #fb7185;
+}
+
+.userprofile-form {
+  padding-top: 23px;
+}
+
+.userprofile-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.userprofile-field {
+  min-width: 0;
+}
+
+.userprofile-field label,
+.userprofile-address-form label {
+  display: block;
+  margin-bottom: 9px;
+  color: #d8cddd;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.userprofile-field input,
+.userprofile-address-form textarea {
+  width: 100%;
+  padding: 13px;
+  box-sizing: border-box;
+  background: #15101b;
+  color: #f5f5f5;
+  border: 1px solid #493650;
+  border-radius: 7px;
+  outline: none;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+}
+
+.userprofile-field input:focus,
+.userprofile-address-form textarea:focus {
+  border-color: #f97316;
+}
+
+.userprofile-address-form {
+  margin-top: 22px;
+}
+
+.userprofile-address-form textarea {
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.userprofile-actions .userprofile-primary {
+  min-width: 145px;
+}
+
+.userprofile-message {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 13px 15px;
+  background: #292034;
+  border: 1px solid #493650;
+  border-radius: 8px;
+  color: #ffb17d;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.userprofile-message button {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: #ffb17d;
+  cursor: pointer;
+}
+
+.userprofile-logout {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 17px 20px;
+  background: #211a2a;
+  color: #fb7185;
+  border: 1px solid #493650;
+  border-radius: 10px;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.userprofile-logout:hover {
+  border-color: #fb7185;
+}
+
+.userprofile-logout svg:last-child {
+  margin-left: auto;
+  color: #b9afc3;
+  font-size: 12px;
+}
+
+.userprofile-footer {
+  padding: 20px;
+  border-top: 1px solid #302438;
+  text-align: center;
+}
+
+.userprofile-footer p {
+  margin: 0;
+  color: #94849e;
+  font-size: 12px;
+}
+
+@media (max-width: 650px) {
+  .userprofile-topbar {
+    padding: 13px 16px;
+  }
+
+  .userprofile-main {
+    padding: 25px 16px 35px;
+  }
+
+  .userprofile-title h1 {
+    font-size: 25px;
+  }
+
+  .userprofile-card {
+    padding: 18px;
+  }
+
+  .userprofile-personal-top {
+    gap: 13px;
+  }
+
+  .userprofile-edit-btn {
+    width: 100%;
+  }
+
+  .userprofile-info-grid,
+  .userprofile-menu-grid,
+  .userprofile-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .userprofile-info-grid {
+    gap: 20px;
+  }
+
+  .userprofile-menu-card {
+    min-height: 82px;
+  }
+
+  .userprofile-address-actions,
+  .userprofile-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .userprofile-address-actions button,
+  .userprofile-actions button {
+    width: 100%;
+  }
+}
