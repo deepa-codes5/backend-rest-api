@@ -14,6 +14,7 @@ import OrderReview from "./components/review";
 import OrderTracking from "./components/tracking";
 import UserProfile from "./components/userprofile";
 import PaymentMethod from "./components/payment";
+import AdminDashboard from "./components/dashboard";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
          <Route path="/checkout" element={<Checkout />} />
          <Route path="/payment-method" element={<PaymentMethod />}/>
          <Route path="/order-tracking" element={<OrderTracking />}/>
+         <Route path="/admin-dashboard" element={<AdminDashboard />}/>
 
       </Routes>
     </BrowserRouter>
