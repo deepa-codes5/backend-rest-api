@@ -13,7 +13,6 @@ import {
   FaDollarSign,
   FaChartLine,
   FaArrowUp,
-  FaBars,
 } from "react-icons/fa";
 
 function AdminDashboard() {
@@ -22,7 +21,7 @@ function AdminDashboard() {
   const menuItems = [
     { name: "Dashboard", icon: <FaThLarge />, path: "/admin-dashboard" },
     { name: "Users", icon: <FaUsers />, path: "/admin-users" },
-    { name: "Products", icon: <FaBox />, path: "/admin-products" },
+    { name: "Products", icon: <FaBox />, path: "/admin/products" },
     { name: "Orders", icon: <FaShoppingBag />, path: "/admin-orders" },
     { name: "Payments", icon: <FaCreditCard />, path: "/admin-payments" },
     { name: "Inventory", icon: <FaWarehouse />, path: "/admin-inventory" },
@@ -93,6 +92,18 @@ function AdminDashboard() {
     navigate("/login");
   };
 
+  const handleMenuClick = (item) => {
+    if (item.name === "Dashboard" || item.name === "Products") {
+      navigate(item.path);
+    } else {
+      alert(`${item.name} page will be added next.`);
+    }
+  };
+
+  const handleManageProducts = () => {
+    navigate("/admin/products");
+  };
+
   return (
     <div className="admin-dashboard">
       <aside className="admin-sidebar">
@@ -111,13 +122,7 @@ function AdminDashboard() {
               className={`admin-nav-item ${
                 item.name === "Dashboard" ? "active" : ""
               }`}
-              onClick={() => {
-                if (item.name === "Dashboard") {
-                  navigate(item.path);
-                } else {
-                  alert(`${item.name} page will be added next.`);
-                }
-              }}
+              onClick={() => handleMenuClick(item)}
             >
               {item.icon}
               <span>{item.name}</span>
@@ -216,7 +221,9 @@ function AdminDashboard() {
             <button
               type="button"
               className="admin-quick-item"
-              onClick={() => alert("User Management page will be added next.")}
+              onClick={() =>
+                alert("User Management page will be added next.")
+              }
             >
               <FaUsers />
               <span>Manage Users</span>
@@ -226,7 +233,7 @@ function AdminDashboard() {
             <button
               type="button"
               className="admin-quick-item"
-              onClick={() => alert("Product Management page will be added next.")}
+              onClick={handleManageProducts}
             >
               <FaBox />
               <span>Manage Products</span>
@@ -236,7 +243,9 @@ function AdminDashboard() {
             <button
               type="button"
               className="admin-quick-item"
-              onClick={() => alert("Order Management page will be added next.")}
+              onClick={() =>
+                alert("Order Management page will be added next.")
+              }
             >
               <FaShoppingBag />
               <span>Manage Orders</span>
@@ -255,7 +264,9 @@ function AdminDashboard() {
             <button
               type="button"
               className="admin-view-all"
-              onClick={() => alert("Order Management page will be added next.")}
+              onClick={() =>
+                alert("Order Management page will be added next.")
+              }
             >
               View All →
             </button>
@@ -267,7 +278,7 @@ function AdminDashboard() {
                 <tr>
                   <th>Order ID</th>
                   <th>Customer</th>
-                  <th>Product</th>
+                  <th>Products</th>
                   <th>Amount</th>
                   <th>Status</th>
                 </tr>
