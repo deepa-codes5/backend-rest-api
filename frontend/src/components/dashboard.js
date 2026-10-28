@@ -22,7 +22,7 @@ function AdminDashboard() {
     { name: "Dashboard", icon: <FaThLarge />, path: "/admin-dashboard" },
     { name: "Users", icon: <FaUsers />, path: "/admin-users" },
     { name: "Products", icon: <FaBox />, path: "/admin/products" },
-    { name: "Orders", icon: <FaShoppingBag />, path: "/admin-orders" },
+    { name: "Orders", icon: <FaShoppingBag />, path: "/order-management" },
     { name: "Payments", icon: <FaCreditCard />, path: "/admin-payments" },
     { name: "Inventory", icon: <FaWarehouse />, path: "/admin-inventory" },
     { name: "Settings", icon: <FaCog />, path: "/admin-settings" },
@@ -93,7 +93,11 @@ function AdminDashboard() {
   };
 
   const handleMenuClick = (item) => {
-    if (item.name === "Dashboard" || item.name === "Products") {
+    if (
+      item.name === "Dashboard" ||
+      item.name === "Products" ||
+      item.name === "Orders"
+    ) {
       navigate(item.path);
     } else {
       alert(`${item.name} page will be added next.`);
@@ -102,6 +106,10 @@ function AdminDashboard() {
 
   const handleManageProducts = () => {
     navigate("/admin/products");
+  };
+
+  const handleManageOrders = () => {
+    navigate("/order-management");
   };
 
   return (
@@ -243,9 +251,7 @@ function AdminDashboard() {
             <button
               type="button"
               className="admin-quick-item"
-              onClick={() =>
-                alert("Order Management page will be added next.")
-              }
+              onClick={handleManageOrders}
             >
               <FaShoppingBag />
               <span>Manage Orders</span>
@@ -264,9 +270,7 @@ function AdminDashboard() {
             <button
               type="button"
               className="admin-view-all"
-              onClick={() =>
-                alert("Order Management page will be added next.")
-              }
+              onClick={handleManageOrders}
             >
               View All →
             </button>

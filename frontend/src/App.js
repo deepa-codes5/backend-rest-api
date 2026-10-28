@@ -16,6 +16,7 @@ import UserProfile from "./components/userprofile";
 import PaymentMethod from "./components/payment";
 import AdminDashboard from "./components/dashboard";
 import ProductManagement from "./components/productManagement";
+import OrderManagement from "./components/ordermanagement";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
          <Route path="/order-tracking" element={<OrderTracking />}/>
          <Route path="/admin-dashboard" element={<AdminDashboard />}/>
          <Route path="/admin/products" element={<ProductManagement />}/>
+         <Route path="/order-management"element={<OrderManagement />}/>
 
       </Routes>
     </BrowserRouter>
