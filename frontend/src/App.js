@@ -17,6 +17,7 @@ import PaymentMethod from "./components/payment";
 import AdminDashboard from "./components/dashboard";
 import ProductManagement from "./components/productManagement";
 import OrderManagement from "./components/ordermanagement";
+import PaymentManagement from "./components/paymentmanagement";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
          <Route path="/admin-dashboard" element={<AdminDashboard />}/>
          <Route path="/admin/products" element={<ProductManagement />}/>
          <Route path="/order-management"element={<OrderManagement />}/>
+         <Route path="/admin-payments"element={<PaymentManagement />}/>
 
       </Routes>
     </BrowserRouter>

@@ -96,7 +96,8 @@ function AdminDashboard() {
     if (
       item.name === "Dashboard" ||
       item.name === "Products" ||
-      item.name === "Orders"
+      item.name === "Orders" ||
+      item.name === "Payments"
     ) {
       navigate(item.path);
     } else {
