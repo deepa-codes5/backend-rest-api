@@ -83,7 +83,7 @@ console.log("DB OTP:", student?.otp);
       });
     }
 
-    // OTP check
+    
     if (student.otp !== otp) {
       return res.status(400).json({
         message: "Invalid OTP"

@@ -1,14 +1,19 @@
+
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./otpverification.css";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function OTPVerification() {
-    const [email, setEmail] = useState("");
-    const [otp, setOtp] = useState("");
-
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const [email, setEmail] = useState(
+        location.state?.email || ""
+    );
+
+    const [otp, setOtp] = useState("");
 
     const handleVerifyOTP = async () => {
         if (!email || !otp) {
@@ -16,27 +21,39 @@ function OTPVerification() {
             return;
         }
 
+        if (!/^\d{6}$/.test(otp)) {
+            toast.error("Please enter a valid 6-digit OTP");
+            return;
+        }
+
         try {
-            const response = await fetch("http://localhost:5000/verify-otp", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    email: email,
-                    otp: otp
-                })
-            });
+            const response = await fetch(
+                "http://localhost:5000/verify-otp",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        otp: otp
+                    })
+                }
+            );
 
             const data = await response.json();
 
             console.log("OTP response:", data);
 
             if (!response.ok) {
-                throw new Error(data.message || "OTP verification failed");
+                throw new Error(
+                    data.message || "OTP verification failed"
+                );
             }
 
-            toast.success(data.message || "OTP verified successfully");
+            toast.success(
+                data.message || "OTP verified successfully"
+            );
 
             setTimeout(() => {
                 navigate("/login");
@@ -62,13 +79,17 @@ function OTPVerification() {
                     value={email}
                     placeholder="Email"
                     onChange={(e) => setEmail(e.target.value)}
+                    readOnly={!!location.state?.email}
                 />
 
                 <input
                     type="text"
                     value={otp}
                     placeholder="Enter OTP"
-                    onChange={(e) => setOtp(e.target.value)}
+                    maxLength="6"
+                    onChange={(e) =>
+                        setOtp(e.target.value.replace(/\D/g, ""))
+                    }
                 />
 
                 <button onClick={handleVerifyOTP}>
