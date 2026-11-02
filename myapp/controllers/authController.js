@@ -26,42 +26,43 @@ const getUserById = async (req, res) => {
 
 
 const editUserById = async (req, res) => {
-    try {
-        const { name, email, mobileNumber } = req.body;
+  try {
+    const { name, email, mobileNumber, address } = req.body;
 
-        const updates = {};
+    const updates = {};
 
-        if (name !== undefined) updates.name = name;
-        if (email !== undefined) updates.email = email;
-        if (mobileNumber !== undefined) {
-            updates.mobileNumber = mobileNumber;
-        }
+    if (name !== undefined) updates.name = name;
+    if (email !== undefined) updates.email = email;
+    if (mobileNumber !== undefined) updates.mobileNumber = mobileNumber;
+    if (address !== undefined) updates.address = address;
 
-        const student = await Student.findByIdAndUpdate(
-            req.user.id,
-            { $set: updates },
-            { new: true, runValidators: true }
-        ).select("-password -otp -otpExpires");
+    const student = await Student.findByIdAndUpdate(
+      req.user.id,
+      { $set: updates },
+      {
+        new: true,
+        runValidators: true
+      }
+    ).select("-password -otp -otpExpires");
 
-        if (!student) {
-            return res.status(404).json({
-                message: "User not found"
-            });
-        }
-
-        res.status(200).json({
-            message: "User updated successfully",
-            student
-        });
-
-    } catch (error) {
-        res.status(500).json({
-            message: "User update failed",
-            error: error.message
-        });
+    if (!student) {
+      return res.status(404).json({
+        message: "User not found"
+      });
     }
-};
 
+    res.status(200).json({
+      message: "Profile updated successfully",
+      student
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Profile update failed",
+      error: error.message
+    });
+  }
+};
 
 
 const deleteUserById = async (req, res) => {

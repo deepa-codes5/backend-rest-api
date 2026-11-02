@@ -1,6 +1,6 @@
 
 import "./userprofile.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaUserCircle,
@@ -23,37 +23,98 @@ import {
 function UserProfile() {
   const navigate = useNavigate();
 
-  const [profile, setProfile] = useState(() => {
-    try {
-      return {
-        name: localStorage.getItem("userName") || "",
-        email: localStorage.getItem("userEmail") || "",
-        mobile: localStorage.getItem("userMobile") || "",
-      };
-    } catch {
-      return { name: "", email: "", mobile: "" };
-    }
+  const [profile, setProfile] = useState({
+    name: "",
+    email: "",
+    mobile: "",
   });
 
-  const [formData, setFormData] = useState(profile);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    mobile: "",
+  });
+
   const [isEditing, setIsEditing] = useState(false);
   const [message, setMessage] = useState("");
-  const [address, setAddress] = useState(() => {
-    try {
-      return localStorage.getItem("userAddress") || "";
-    } catch {
-      return "";
-    }
-  });
-  const [addressInput, setAddressInput] = useState(address);
+  const [address, setAddress] = useState("");
+  const [addressInput, setAddressInput] = useState("");
   const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [loading, setLoading] = useState(true);
 
+  const API_URL = "http://localhost:5000/me";
+
+  // GET PROFILE FROM BACKEND
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          navigate("/login", { replace: true });
+          return;
+        }
+
+        const response = await fetch(API_URL, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            localStorage.removeItem("token");
+            navigate("/login", { replace: true });
+            return;
+          }
+
+          throw new Error(data.message || "Unable to fetch profile");
+        }
+
+        const student = data.student;
+
+        const userProfile = {
+          name: student.name || "",
+          email: student.email || "",
+          mobile: student.mobileNumber || "",
+        };
+
+        setProfile(userProfile);
+        setFormData(userProfile);
+
+        setAddress(student.address || "");
+        setAddressInput(student.address || "");
+
+        localStorage.setItem("userName", userProfile.name);
+        localStorage.setItem("userEmail", userProfile.email);
+        localStorage.setItem("userMobile", userProfile.mobile);
+        localStorage.setItem("userAddress", student.address || "");
+
+      } catch (error) {
+        setMessage(error.message || "Unable to load profile.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [navigate]);
+
+  // FORM INPUT CHANGE
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleSave = (e) => {
+  // UPDATE PROFILE USING PUT API
+  const handleSave = async (e) => {
     e.preventDefault();
 
     if (!formData.name.trim() || !formData.email.trim()) {
@@ -62,60 +123,137 @@ function UserProfile() {
     }
 
     try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(API_URL, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          mobileNumber: formData.mobile.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Profile update failed");
+      }
+
+      const student = data.student;
+
       const updatedProfile = {
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        mobile: formData.mobile.trim(),
+        name: student.name || "",
+        email: student.email || "",
+        mobile: student.mobileNumber || "",
       };
+
+      setProfile(updatedProfile);
+      setFormData(updatedProfile);
+      setIsEditing(false);
 
       localStorage.setItem("userName", updatedProfile.name);
       localStorage.setItem("userEmail", updatedProfile.email);
       localStorage.setItem("userMobile", updatedProfile.mobile);
 
-      setProfile(updatedProfile);
-      setFormData(updatedProfile);
-      setIsEditing(false);
       setMessage("Profile updated successfully!");
-    } catch {
-      setMessage("Unable to save profile. Please try again.");
+
+    } catch (error) {
+      setMessage(error.message || "Unable to save profile.");
     }
   };
 
+  // CANCEL PROFILE EDIT
   const handleCancel = () => {
     setFormData(profile);
     setIsEditing(false);
     setMessage("");
   };
 
-  const handleSaveAddress = (e) => {
+  // SAVE ADDRESS USING PUT API
+  const handleSaveAddress = async (e) => {
     e.preventDefault();
 
     if (!addressInput.trim()) {
+      setMessage("Please enter your address.");
       return;
     }
 
     try {
-      localStorage.setItem("userAddress", addressInput.trim());
-      setAddress(addressInput.trim());
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(API_URL, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          address: addressInput.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Address update failed");
+      }
+
+      const updatedAddress = data.student.address || "";
+
+      setAddress(updatedAddress);
+      setAddressInput(updatedAddress);
       setIsEditingAddress(false);
+
+      localStorage.setItem("userAddress", updatedAddress);
+
       setMessage("Address saved successfully!");
-    } catch {
-      setMessage("Unable to save address. Please try again.");
+
+    } catch (error) {
+      setMessage(error.message || "Unable to save address.");
     }
   };
 
-  const handleDeleteAddress = () => {
+  // DELETE ADDRESS USING PUT API
+  const handleDeleteAddress = async () => {
     try {
-      localStorage.removeItem("userAddress");
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(API_URL, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          address: "",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Address removal failed");
+      }
+
       setAddress("");
       setAddressInput("");
       setIsEditingAddress(false);
+
+      localStorage.removeItem("userAddress");
+
       setMessage("Address removed.");
-    } catch {
-      setMessage("Unable to remove address.");
+
+    } catch (error) {
+      setMessage(error.message || "Unable to remove address.");
     }
   };
 
+  // LOGOUT
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login", { replace: true });
@@ -153,6 +291,16 @@ function UserProfile() {
       action: () => navigate("/support"),
     },
   ];
+
+  if (loading) {
+    return (
+      <div className="userprofile-page">
+        <main className="userprofile-main">
+          <p>Loading your profile...</p>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="userprofile-page">
