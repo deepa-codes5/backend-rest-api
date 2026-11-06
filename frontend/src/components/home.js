@@ -10,26 +10,21 @@ function Home() {
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [products, setProducts] = useState([]);
+  const [productLoading, setProductLoading] = useState(true);
+  const [productError, setProductError] = useState("");
+
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
-  const [cart, setCart] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("cart")) || [];
-    } catch {
-      return [];
-    }
-  });
+  const [cartCount, setCartCount] = useState(0);
+  const [addingProductId, setAddingProductId] = useState("");
 
-  const [wishlist, setWishlist] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("wishlist")) || [];
-    } catch {
-      return [];
-    }
-  });
+  const [wishlist, setWishlist] = useState([]);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
-
+  // GET STUDENT DETAILS
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -49,9 +44,7 @@ function Home() {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(
-            data.message || "Failed to fetch student data"
-          );
+          throw new Error(data.message || "Failed to fetch student data");
         }
 
         return data;
@@ -60,7 +53,7 @@ function Home() {
         setStudent(data.students);
       })
       .catch((error) => {
-        console.log("API error:", error);
+        console.log("Student API error:", error);
         setError(error.message);
       })
       .finally(() => {
@@ -68,43 +61,102 @@ function Home() {
       });
   }, []);
 
+  // GET ALL PRODUCTS
+  useEffect(() => {
+    fetch("http://localhost:5000/products")
+      .then(async (response) => {
+        const data = await response.json();
 
-  const products = [
-    {
-      id: 1,
-      name: "Wireless Headphones",
-      price: 1500,
-      category: "Electronics",
-      image:
-        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
-    },
-    {
-      id: 2,
-      name: "Smart Watch",
-      price: 2500,
-      category: "Accessories",
-      image:
-        "https://images.unsplash.com/photo-1523275335684-37898b6baf30",
-    },
-    {
-      id: 3,
-      name: "Casual Shoes",
-      price: 1800,
-      category: "Fashion",
-      image:
-        "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
-    },
-    {
-      id: 4,
-      name: "Backpack",
-      price: 1200,
-      category: "Accessories",
-      image:
-        "https://images.unsplash.com/photo-1553062407-98eeb64c6a62",
-    },
-  ];
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to fetch products");
+        }
 
+        return data;
+      })
+      .then((data) => {
+        setProducts(data.products || []);
+      })
+      .catch((error) => {
+        console.log("Product API error:", error);
+        setProductError(error.message);
+      })
+      .finally(() => {
+        setProductLoading(false);
+      });
+  }, []);
 
+  // GET CART
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) return;
+
+    fetch("http://localhost:5000/cart", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(async (response) => {
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to fetch cart");
+        }
+
+        return data;
+      })
+      .then((data) => {
+        const items = data.cart?.items || [];
+
+        const count = items.reduce(
+          (total, item) => total + Number(item.quantity || 1),
+          0
+        );
+
+        setCartCount(count);
+      })
+      .catch((error) => {
+        console.log("Cart API error:", error);
+      });
+  }, []);
+
+  // GET WISHLIST FROM BACKEND
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) return;
+
+    fetch("http://localhost:5000/wishlist", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(async (response) => {
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to fetch wishlist");
+        }
+
+        return data;
+      })
+      .then((data) => {
+        const products = data.wishlist?.products || [];
+
+        const productIds = products.map((item) =>
+          typeof item === "string" ? item : item._id
+        );
+
+        setWishlist(productIds.filter(Boolean));
+      })
+      .catch((error) => {
+        console.log("Wishlist API error:", error);
+      });
+  }, []);
+
+  // FILTER PRODUCTS
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name
       .toLowerCase()
@@ -117,37 +169,109 @@ function Home() {
     return matchesSearch && matchesCategory;
   });
 
+  // ADD TO CART
+  const addToCart = async (product) => {
+    const token = localStorage.getItem("token");
 
-  const addToCart = (product) => {
-    const updatedCart = [...cart, product];
+    if (!token) {
+      navigate("/login");
+      return;
+    }
 
-    setCart(updatedCart);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
+    try {
+      setAddingProductId(product._id);
+
+      const response = await fetch("http://localhost:5000/cart/add", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId: product._id,
+          quantity: 1,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to add product");
+      }
+
+      const items = data.cart?.items || [];
+
+      const count = items.reduce(
+        (total, item) => total + Number(item.quantity || 1),
+        0
+      );
+
+      setCartCount(count);
+    } catch (error) {
+      console.log("Add to cart error:", error);
+    } finally {
+      setAddingProductId("");
+    }
   };
 
+  // ADD / REMOVE WISHLIST
+  const toggleWishlist = async (product) => {
+    const token = localStorage.getItem("token");
 
-  const toggleWishlist = (product) => {
-    const alreadyAdded = wishlist.some(
-      (item) => item.id === product.id
-    );
+    if (!token) {
+      navigate("/login");
+      return;
+    }
 
-    const updatedWishlist = alreadyAdded
-      ? wishlist.filter((item) => item.id !== product.id)
-      : [...wishlist, product];
+    const alreadyAdded = wishlist.includes(product._id);
 
-    setWishlist(updatedWishlist);
-    localStorage.setItem(
-      "wishlist",
-      JSON.stringify(updatedWishlist)
-    );
+    try {
+      setWishlistLoading(true);
+
+      const response = await fetch(
+        alreadyAdded
+          ? `http://localhost:5000/wishlist/remove/${product._id}`
+          : "http://localhost:5000/wishlist/add",
+        {
+          method: alreadyAdded ? "DELETE" : "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          ...(!alreadyAdded && {
+            body: JSON.stringify({
+              productId: product._id,
+            }),
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Wishlist operation failed");
+      }
+
+      setWishlist((previous) =>
+        alreadyAdded
+          ? previous.filter((id) => id !== product._id)
+          : [...previous, product._id]
+      );
+
+      console.log("Wishlist:", data.message);
+    } catch (error) {
+      console.log("Wishlist error:", error);
+    } finally {
+      setWishlistLoading(false);
+    }
   };
 
-
+  // OPEN CART
   const openCart = () => {
     navigate("/cart");
   };
 
-
+  // OPEN WISHLIST
   const openWishlist = () => {
     navigate("/wishlist");
   };
@@ -176,7 +300,7 @@ function Home() {
             onClick={openCart}
             style={{ cursor: "pointer" }}
           >
-            Cart ({cart.length})
+            Cart ({cartCount})
           </span>
 
           <span
@@ -186,14 +310,12 @@ function Home() {
             Wishlist ({wishlist.length})
           </span>
 
-
           <FaUserCircle
             className="profile-icon"
             onClick={() => navigate("/profile")}
             style={{ cursor: "pointer" }}
             title="My Profile"
           />
-
         </div>
       </header>
 
@@ -239,18 +361,22 @@ function Home() {
         </select>
 
         <div className="service-container">
-          {filteredProducts.length > 0 ? (
+          {productLoading ? (
+            <p>Loading products...</p>
+          ) : productError ? (
+            <p>{productError}</p>
+          ) : filteredProducts.length > 0 ? (
             filteredProducts.map((product) => {
-              const isWishlisted = wishlist.some(
-                (item) => item.id === product.id
-              );
+              const isWishlisted = wishlist.includes(product._id);
 
               return (
-                <div className="service-card" key={product.id}>
+                <div className="service-card" key={product._id}>
                   <button
-                    className={`wishlist-icon ${isWishlisted ? "active" : ""
-                      }`}
+                    className={`wishlist-icon ${
+                      isWishlisted ? "active" : ""
+                    }`}
                     onClick={() => toggleWishlist(product)}
+                    disabled={wishlistLoading}
                     aria-label={
                       isWishlisted
                         ? "Remove from wishlist"
@@ -270,7 +396,7 @@ function Home() {
                     alt={product.name}
                     className="product-image"
                     onClick={() =>
-                      navigate(`/product/${product.id}`, {
+                      navigate(`/product/${product._id}`, {
                         state: { product },
                       })
                     }
@@ -279,7 +405,7 @@ function Home() {
 
                   <h3
                     onClick={() =>
-                      navigate(`/product/${product.id}`, {
+                      navigate(`/product/${product._id}`, {
                         state: { product },
                       })
                     }
@@ -291,14 +417,17 @@ function Home() {
                   <p>{product.category}</p>
 
                   <h4>
-                    ₹{product.price.toLocaleString("en-IN")}
+                    ₹{Number(product.price).toLocaleString("en-IN")}
                   </h4>
 
                   <button
                     className="product-button"
                     onClick={() => addToCart(product)}
+                    disabled={addingProductId === product._id}
                   >
-                    Add to Cart
+                    {addingProductId === product._id
+                      ? "Adding..."
+                      : "Add to Cart"}
                   </button>
                 </div>
               );

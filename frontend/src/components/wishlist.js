@@ -12,51 +12,154 @@ import {
 function Wishlist() {
   const navigate = useNavigate();
 
- 
-  const [wishlist, setWishlist] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("wishlist")) || [];
-    } catch {
-      return [];
-    }
-  });
+  const [wishlist, setWishlist] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [removingId, setRemovingId] = useState("");
+  const [addingId, setAddingId] = useState("");
 
+  // GET WISHLIST FROM BACKEND
   useEffect(() => {
-    localStorage.setItem("wishlist", JSON.stringify(wishlist));
-  }, [wishlist]);
+    const token = localStorage.getItem("token");
 
+    if (!token) {
+      navigate("/login");
+      return;
+    }
 
-  const removeFromWishlist = (productId) => {
-    const updatedWishlist = wishlist.filter(
-      (product) => product.id !== productId
-    );
+    fetch("http://localhost:5000/wishlist", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(async (response) => {
+        const data = await response.json();
 
-    setWishlist(updatedWishlist);
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to load wishlist");
+        }
+
+        return data;
+      })
+      .then((data) => {
+        const products = data.wishlist?.products || [];
+        setWishlist(products);
+      })
+      .catch((error) => {
+        console.log("Wishlist API error:", error);
+        setError(error.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [navigate]);
+
+  // REMOVE FROM WISHLIST
+  const removeFromWishlist = async (productId) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      setRemovingId(productId);
+
+      const response = await fetch(
+        `http://localhost:5000/wishlist/remove/${productId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Unable to remove product");
+      }
+
+      setWishlist((previous) =>
+        previous.filter((product) => product._id !== productId)
+      );
+
+      console.log("Remove Wishlist:", data.message);
+    } catch (error) {
+      console.log("Remove wishlist error:", error);
+      alert(error.message);
+    } finally {
+      setRemovingId("");
+    }
   };
 
- 
-  const addToCart = (product) => {
-    let cart = [];
+  // ADD TO CART AND REMOVE FROM WISHLIST
+  const addToCart = async (product) => {
+    const token = localStorage.getItem("token");
 
-    try {
-      cart = JSON.parse(localStorage.getItem("cart")) || [];
-    } catch {
-      cart = [];
+    if (!token) {
+      navigate("/login");
+      return;
     }
 
-    const updatedCart = [...cart, product];
+    try {
+      setAddingId(product._id);
 
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
+      // ADD PRODUCT TO CART
+      const cartResponse = await fetch(
+        "http://localhost:5000/cart/add",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            productId: product._id,
+            quantity: 1,
+          }),
+        }
+      );
 
-   
-    const updatedWishlist = wishlist.filter(
-      (item) => item.id !== product.id
-    );
+      const cartData = await cartResponse.json();
 
-    setWishlist(updatedWishlist);
+      if (!cartResponse.ok || !cartData.success) {
+        throw new Error(cartData.message || "Unable to add product to cart");
+      }
 
-    // Navigate to cart page
-    navigate("/cart");
+      // REMOVE PRODUCT FROM WISHLIST
+      const wishlistResponse = await fetch(
+        `http://localhost:5000/wishlist/remove/${product._id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const wishlistData = await wishlistResponse.json();
+
+      if (!wishlistResponse.ok || !wishlistData.success) {
+        throw new Error(
+          wishlistData.message || "Product added to cart but wishlist removal failed"
+        );
+      }
+
+      setWishlist((previous) =>
+        previous.filter((item) => item._id !== product._id)
+      );
+
+      navigate("/cart");
+    } catch (error) {
+      console.log("Add to cart error:", error);
+      alert(error.message);
+    } finally {
+      setAddingId("");
+    }
   };
 
   return (
@@ -76,7 +179,22 @@ function Wishlist() {
         <p>{wishlist.length} saved products</p>
       </header>
 
-      {wishlist.length === 0 ? (
+      {loading ? (
+        <div className="wishlist-empty">
+          <p>Loading wishlist...</p>
+        </div>
+      ) : error ? (
+        <div className="wishlist-empty">
+          <p>{error}</p>
+
+          <button
+            className="wishlist-shop-button"
+            onClick={() => navigate("/home")}
+          >
+            Back to Home
+          </button>
+        </div>
+      ) : wishlist.length === 0 ? (
         <div className="wishlist-empty">
           <FaHeart className="wishlist-empty-heart" />
 
@@ -96,13 +214,18 @@ function Wishlist() {
       ) : (
         <div className="wishlist-products">
           {wishlist.map((product) => (
-            <div className="wishlist-card" key={product.id}>
+            <div className="wishlist-card" key={product._id}>
               <button
                 className="wishlist-remove-button"
-                onClick={() => removeFromWishlist(product.id)}
+                onClick={() => removeFromWishlist(product._id)}
+                disabled={removingId === product._id}
                 title="Remove from wishlist"
               >
-                <FaTrashAlt />
+                {removingId === product._id ? (
+                  "..."
+                ) : (
+                  <FaTrashAlt />
+                )}
               </button>
 
               <img
@@ -110,7 +233,7 @@ function Wishlist() {
                 alt={product.name}
                 className="wishlist-image"
                 onClick={() =>
-                  navigate(`/product/${product.id}`, {
+                  navigate(`/product/${product._id}`, {
                     state: { product },
                   })
                 }
@@ -124,14 +247,18 @@ function Wishlist() {
                 </p>
 
                 <h4>
-                  ₹{product.price.toLocaleString("en-IN")}
+                  ₹{Number(product.price).toLocaleString("en-IN")}
                 </h4>
 
                 <button
                   className="wishlist-add-cart"
                   onClick={() => addToCart(product)}
+                  disabled={addingId === product._id}
                 >
-                  <FaShoppingCart /> Add to Cart
+                  <FaShoppingCart />
+                  {addingId === product._id
+                    ? "Adding..."
+                    : "Add to Cart"}
                 </button>
               </div>
             </div>
