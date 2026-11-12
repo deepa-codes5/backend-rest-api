@@ -1,7 +1,6 @@
 
 const Wishlist = require("../models/wishlistModel");
 const Product = require("../models/productModel");
-const mongoose = require("mongoose");
 
 // ADD PRODUCT TO WISHLIST
 const addToWishlist = async (req, res) => {
@@ -16,16 +15,9 @@ const addToWishlist = async (req, res) => {
       });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid product ID"
-      });
-    }
-
-    // CHECK PRODUCT
+    // CHECK PRODUCT (String ID)
     const product = await Product.findOne({
-      _id: new mongoose.Types.ObjectId(productId),
+      _id: productId,
       isActive: true
     });
 
@@ -50,7 +42,7 @@ const addToWishlist = async (req, res) => {
 
     // CHECK DUPLICATE
     const alreadyExists = wishlist.products.some(
-      (id) => id.toString() === productId
+      (id) => id.toString() === productId.toString()
     );
 
     if (alreadyExists) {
@@ -126,10 +118,10 @@ const removeFromWishlist = async (req, res) => {
     const userId = req.user.id;
     const { productId } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
+    if (!productId) {
       return res.status(400).json({
         success: false,
-        message: "Invalid product ID"
+        message: "Product ID is required"
       });
     }
 
@@ -145,7 +137,7 @@ const removeFromWishlist = async (req, res) => {
     }
 
     wishlist.products = wishlist.products.filter(
-      (id) => id.toString() !== productId
+      (id) => id.toString() !== productId.toString()
     );
 
     await wishlist.save();

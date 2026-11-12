@@ -15,6 +15,19 @@ const router = express.Router();
 
 
 router.get( "/",authMiddleware,studentController.getIndex);
+
+router.get(
+    "/me",
+    authMiddleware,
+    studentController.getMyProfile
+);
+
+
+router.put(
+    "/me",
+    authMiddleware,
+    studentController.updateMyProfile
+);
 router.post( "/",validateStudentPayload,studentController.createStudent);
 router.put("/2fa/enable",authMiddleware,authController.enable2FA);
 

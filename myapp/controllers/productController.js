@@ -71,8 +71,31 @@ const getProductById = async (req, res) => {
         message: "Invalid product ID"
       });
     }
+    
+    console.log("========== PRODUCT DEBUG ==========");
+console.log("DATABASE:", Product.db.name);
+console.log("COLLECTION:", Product.collection.name);
+console.log("REQUEST ID:", id);
+const products = await Product.collection.find({}).toArray();
 
-    const product = await Product.findById(id);
+console.log("TOTAL PRODUCTS:", products.length);
+
+console.log(
+  "ALL IDS:",
+  products.map(p => ({
+    id: p._id,
+    type: typeof p._id
+  }))
+);
+
+
+
+
+  const product = await Product.findOne({
+  _id: id
+});
+    console.log("FOUND PRODUCT:", product);
+console.log("===================================");
 
     if (!product || product.isActive === false) {
       return res.status(404).json({

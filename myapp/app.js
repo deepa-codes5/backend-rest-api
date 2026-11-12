@@ -15,7 +15,8 @@ var indexRouter = require('./routes/index');
 const productRoute = require("./routes/productRoute");
 const cartRoute = require("./routes/cartRoute");
 const wishlistRoute = require("./routes/wishlistRoute");
-
+const paymentRoute = require("./routes/paymentRoute");
+const orderRoute = require("./routes/orderRoute");
 var app = express();
 
 app.use(cors());
@@ -34,7 +35,8 @@ app.use('/', indexRouter);
 app.use("/products", productRoute);
 app.use("/cart", cartRoute);
 app.use("/wishlist", wishlistRoute);
-
+app.use("/payment", paymentRoute);
+app.use("/orders", orderRoute);
 // MongoDB Connection
 mongoose.connect("mongodb://127.0.0.1:27017/studentDB")
     .then(() => console.log("MongoDB connected"))
