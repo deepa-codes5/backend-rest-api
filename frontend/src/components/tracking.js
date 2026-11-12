@@ -1,6 +1,6 @@
 
 import "./tracking.css";
-import { useState,  } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaArrowLeft,
@@ -23,14 +23,14 @@ const trackingSteps = [
     icon: FaCheckCircle
   },
   {
-    title: "Processing",
-    description: "Your products are being prepared.",
-    icon: FaBox
-  },
-  {
     title: "Shipped",
     description: "Your order is on its way.",
     icon: FaTruck
+  },
+  {
+    title: "Out for Delivery",
+    description: "Your order is out for delivery.",
+    icon: FaBox
   },
   {
     title: "Delivered",
@@ -39,96 +39,82 @@ const trackingSteps = [
   }
 ];
 
+function getStatusStep(status) {
+  const statusMap = {
+    Placed: 0,
+    Confirmed: 1,
+    Shipped: 2,
+    "Out for Delivery": 3,
+    Delivered: 4
+  };
 
-function getSavedOrders() {
-  try {
-    const saved = JSON.parse(
-      localStorage.getItem("orders") || "[]"
-    );
-
-    return Array.isArray(saved) ? saved : [];
-  } catch {
-    return [];
-  }
+  return statusMap[status] ?? 0;
 }
 
 function OrderTracking() {
   const navigate = useNavigate();
 
-  const [orders, setOrders] = useState(getSavedOrders);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Initialize tracking steps using a consistent order ID
-  const [currentSteps, setCurrentSteps] = useState(() => {
-    const savedSteps = {};
-
-    getSavedOrders().forEach((order, index) => {
-      const orderId =
-        order.id || order.orderId || `ORD-${index + 1}`;
-
-      const step = Number(order.currentStep);
-
-      savedSteps[orderId] = Math.max(
-        0,
-        Math.min(
-          trackingSteps.length - 1,
-          Number.isFinite(step) ? step : 0
-        )
-      );
-    });
-
-    return savedSteps;
-  });
-
-
-  const updateStep = (orderId, newStep) => {
-    const safeStep = Math.max(
-      0,
-      Math.min(trackingSteps.length - 1, newStep)
-    );
-
-    setCurrentSteps((previous) => ({
-      ...previous,
-      [orderId]: safeStep
-    }));
-
-    setOrders((previousOrders) => {
-      const updatedOrders = previousOrders.map(
-        (order, index) => {
-          const savedOrderId =
-            order.id ||
-            order.orderId ||
-            `ORD-${index + 1}`;
-
-          if (savedOrderId === orderId) {
-            return {
-              ...order,
-              currentStep: safeStep,
-              orderStatus: trackingSteps[safeStep].title
-            };
-          }
-
-          return order;
-        }
-      );
-
+  // FETCH ORDERS FROM BACKEND
+  useEffect(() => {
+    const fetchOrders = async () => {
       try {
-        localStorage.setItem(
-          "orders",
-          JSON.stringify(updatedOrders)
-        );
-      } catch (error) {
-        console.error("Unable to save tracking status:", error);
-      }
+        setLoading(true);
+        setError("");
 
-      return updatedOrders;
-    });
-  };
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          throw new Error("Please login to view your orders.");
+        }
+
+        const response = await fetch(
+          "http://localhost:5000/orders/my-orders",
+          {
+            method: "GET",
+            headers: {
+              Authorization: "Bearer " + token
+            }
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(
+            data.message || "Unable to fetch orders."
+          );
+        }
+
+        setOrders(data.orders || []);
+
+        console.log("BACKEND MY ORDERS:", data.orders);
+
+      } catch (err) {
+        console.error("Order fetching error:", err);
+        setError(err.message || "Something went wrong.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, []);
 
   const formatPrice = (price) =>
     Number(price || 0).toLocaleString("en-IN", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
+
+  const formatDate = (date) => {
+    if (!date) return "Date not available";
+
+    return new Date(date).toLocaleDateString("en-IN");
+  };
 
   return (
     <div className="tracking-page">
@@ -141,17 +127,43 @@ function OrderTracking() {
       </button>
 
       <div className="tracking-container">
+
         <div className="tracking-heading">
           <span className="tracking-label">MY ORDERS</span>
           <h1>Track Your Orders</h1>
           <p>Follow your orders' delivery journey.</p>
         </div>
 
-        {orders.length === 0 ? (
+        {/* LOADING */}
+        {loading && (
+          <div className="tracking-order-card">
+            <h3>Loading your orders...</h3>
+          </div>
+        )}
+
+        {/* ERROR */}
+        {!loading && error && (
+          <div className="tracking-order-card">
+            <h3>Unable to load orders</h3>
+            <p>{error}</p>
+
+            <button
+              type="button"
+              className="tracking-back"
+              onClick={() => window.location.reload()}
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+
+        {/* NO ORDERS */}
+        {!loading && !error && orders.length === 0 && (
           <div className="tracking-order-card">
             <h3>No orders found</h3>
+
             <p>
-              Your confirmed orders will appear here.
+              Your orders will appear here after placing an order.
             </p>
 
             <button
@@ -162,166 +174,165 @@ function OrderTracking() {
               Continue Shopping
             </button>
           </div>
-        ) : (
-          orders.map((order, orderIndex) => {
-            const orderId =
-              order.id ||
-              order.orderId ||
-              `ORD-${orderIndex + 1}`;
+        )}
 
-            const currentStep = Math.max(
-              0,
-              Math.min(
-                trackingSteps.length - 1,
-                currentSteps[orderId] ?? 0
-              )
-            );
+        {/* ORDER LIST */}
+        {!loading && !error && orders.map((order) => {
 
-            const activeStep = trackingSteps[currentStep];
+          const orderId = order._id;
 
-            const products = Array.isArray(order.products)
-              ? order.products
-              : Array.isArray(order.items)
-              ? order.items
-              : Array.isArray(order.cart)
-              ? order.cart
-              : order.product
-              ? [order.product]
-              : order.productName
-              ? [order]
-              : [];
+          const orderStatus = order.orderStatus || "Placed";
 
-            const total =
-              order.totalAmount ??
-              order.total ??
-              products.reduce((sum, product) => {
-                const price = Number(product.price) || 0;
-                const quantity = Math.max(
-                  1,
-                  Number(product.quantity) || 1
-                );
+          const currentStep = getStatusStep(orderStatus);
 
-                return sum + price * quantity;
-              }, 0);
+          const activeStep = trackingSteps[currentStep];
 
-            return (
-              <div key={orderId}>
-                <div className="tracking-order-card">
-                  <div className="tracking-order-top">
-                    <div>
-                      <span className="tracking-muted">
-                        Order ID
-                      </span>
-                      <h3>{orderId}</h3>
-                    </div>
+          const products = order.items || [];
 
-                    <span className="tracking-status">
-                      {activeStep.title}
+          return (
+            <div key={orderId}>
+
+              {/* ORDER CARD */}
+              <div className="tracking-order-card">
+
+                <div className="tracking-order-top">
+                  <div>
+                    <span className="tracking-muted">
+                      Order ID
                     </span>
+
+                    <h3>{orderId}</h3>
                   </div>
 
-                  {products.map((product, index) => {
-                    const quantity = Math.max(
-                      1,
-                      Number(product.quantity) || 1
-                    );
-
-                    return (
-                      <div
-                        className="tracking-product"
-                        key={
-                          product._id ||
-                          product.id ||
-                          index
-                        }
-                      >
-                        <img
-                          src={
-                            product.image ||
-                            product.imageUrl ||
-                            "https://placehold.co/100x110/242424/f5f5f5?text=Product"
-                          }
-                          alt={
-                            product.name ||
-                            product.productName ||
-                            "Product"
-                          }
-                        />
-
-                        <div className="tracking-product-info">
-                          <h3>
-                            {product.name ||
-                              product.productName ||
-                              "Product"}
-                          </h3>
-
-                          <p>Quantity: {quantity}</p>
-
-                          <strong>
-                            ₹
-                            {formatPrice(
-                              (Number(product.price) || 0) *
-                                quantity
-                            )}
-                          </strong>
-                        </div>
-                      </div>
-                    );
-                  })}
-
-                  <div className="tracking-order-details">
-                    <div>
-                      <span>Order Date</span>
-                      <strong>
-                        {order.date ||
-                          order.orderDate ||
-                          (order.createdAt
-                            ? new Date(
-                                order.createdAt
-                              ).toLocaleDateString("en-IN")
-                            : "Date not available")}
-                      </strong>
-                    </div>
-
-                    <div>
-                      <span>Expected Delivery</span>
-                      <strong>
-                        {order.expectedDelivery ||
-                          "To be confirmed"}
-                      </strong>
-                    </div>
-
-                    <div>
-                      <span>Total Amount</span>
-                      <strong>
-                        ₹{formatPrice(total)}
-                      </strong>
-                    </div>
-                  </div>
+                  <span className="tracking-status">
+                    {orderStatus}
+                  </span>
                 </div>
 
-                <div className="tracking-progress-card">
-                  <div className="tracking-progress-heading">
-                    <div>
-                      <h2>Order Status</h2>
-                      <p>
-                        Track each step of your delivery.
-                      </p>
-                    </div>
+                {/* PRODUCTS */}
+                {products.map((item, index) => {
 
-                    <span className="tracking-step-count">
-                      {currentStep + 1} of{" "}
-                      {trackingSteps.length}
-                    </span>
+                  const quantity = Math.max(
+                    1,
+                    Number(item.quantity) || 1
+                  );
+
+                  return (
+                    <div
+                      className="tracking-product"
+                      key={item._id || item.product || index}
+                    >
+
+                      <img
+                        src={
+                          item.image ||
+                          "https://placehold.co/100x110/242424/f5f5f5?text=Product"
+                        }
+                        alt={item.name || "Product"}
+                      />
+
+                      <div className="tracking-product-info">
+
+                        <h3>
+                          {item.name || "Product"}
+                        </h3>
+
+                        <p>Quantity: {quantity}</p>
+
+                        <strong>
+                          ₹{formatPrice(
+                            Number(item.price) * quantity
+                          )}
+                        </strong>
+
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* ORDER DETAILS */}
+                <div className="tracking-order-details">
+
+                  <div>
+                    <span>Order Date</span>
+
+                    <strong>
+                      {formatDate(order.createdAt)}
+                    </strong>
                   </div>
 
+                  <div>
+                    <span>Payment Method</span>
+
+                    <strong>
+                      {order.paymentMethod || "N/A"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Payment Status</span>
+
+                    <strong>
+                      {order.paymentStatus || "Pending"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Total Amount</span>
+
+                    <strong>
+                      ₹{formatPrice(order.totalAmount)}
+                    </strong>
+                  </div>
+
+                </div>
+
+              </div>
+
+              {/* TRACKING PROGRESS */}
+              <div className="tracking-progress-card">
+
+                <div className="tracking-progress-heading">
+
+                  <div>
+                    <h2>Order Status</h2>
+
+                    <p>
+                      Track each step of your delivery.
+                    </p>
+                  </div>
+
+                  <span className="tracking-step-count">
+                    {orderStatus === "Cancelled"
+                      ? "Cancelled"
+                      : `${currentStep + 1} of ${trackingSteps.length}`}
+                  </span>
+
+                </div>
+
+                {/* TIMELINE */}
+                {orderStatus === "Cancelled" ? (
+
+                  <div className="tracking-current-box">
+                    <FaBox />
+
+                    <div>
+                      <strong>Order Cancelled</strong>
+                      <p>This order has been cancelled.</p>
+                    </div>
+                  </div>
+
+                ) : (
+
                   <div className="tracking-timeline">
+
                     {trackingSteps.map((step, index) => {
+
                       const StepIcon = step.icon;
-                      const isCompleted =
-                        index <= currentStep;
-                      const isCurrent =
-                        index === currentStep;
+
+                      const isCompleted = index <= currentStep;
+
+                      const isCurrent = index === currentStep;
 
                       return (
                         <div
@@ -332,35 +343,22 @@ function OrderTracking() {
                           }`}
                           key={step.title}
                         >
-                          <button
-                            type="button"
-                            className="tracking-step-icon"
-                            onClick={() =>
-                              updateStep(orderId, index)
-                            }
-                            aria-label={`Set status to ${step.title}`}
-                          >
+
+                          <div className="tracking-step-icon">
                             <StepIcon />
-                          </button>
+                          </div>
 
                           <div className="tracking-step-content">
-                            <button
-                              type="button"
-                              className="tracking-step-title"
-                              onClick={() =>
-                                updateStep(orderId, index)
-                              }
-                            >
+
+                            <span className="tracking-step-title">
                               {step.title}
-                            </button>
+                            </span>
 
                             <p>{step.description}</p>
 
                             {isCompleted && (
                               <span className="tracking-step-date">
-                                {order.date ||
-                                  order.orderDate ||
-                                  ""}
+                                {formatDate(order.updatedAt)}
                               </span>
                             )}
 
@@ -369,61 +367,39 @@ function OrderTracking() {
                                 CURRENT STATUS
                               </span>
                             )}
+
                           </div>
+
                         </div>
                       );
                     })}
+
                   </div>
+                )}
+
+                {/* CURRENT STATUS */}
+                {orderStatus !== "Cancelled" && (
 
                   <div className="tracking-current-box">
+
                     <FaTruck />
+
                     <div>
                       <strong>{activeStep.title}</strong>
+
                       <p>{activeStep.description}</p>
                     </div>
+
                   </div>
 
-                  <div className="tracking-demo-controls">
-                    <p>
-                      Practice: change this order's tracking status
-                    </p>
+                )}
 
-                    <div className="tracking-demo-buttons">
-                      <button
-                        type="button"
-                        disabled={currentStep === 0}
-                        onClick={() =>
-                          updateStep(
-                            orderId,
-                            currentStep - 1
-                          )
-                        }
-                      >
-                        Previous
-                      </button>
-
-                      <button
-                        type="button"
-                        disabled={
-                          currentStep ===
-                          trackingSteps.length - 1
-                        }
-                        onClick={() =>
-                          updateStep(
-                            orderId,
-                            currentStep + 1
-                          )
-                        }
-                      >
-                        Next Status
-                      </button>
-                    </div>
-                  </div>
-                </div>
               </div>
-            );
-          })
-        )}
+
+            </div>
+          );
+        })}
+
       </div>
     </div>
   );

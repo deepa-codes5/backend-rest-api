@@ -1,27 +1,16 @@
-
 import "./payment.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 function PaymentMethod() {
   const navigate = useNavigate();
 
-  // Read cart from localStorage
-  const [cart] = useState(() => {
-    try {
-      const savedCart = JSON.parse(localStorage.getItem("cart"));
-      return Array.isArray(savedCart) ? savedCart : [];
-    } catch {
-      return [];
-    }
-  });
+  const [cart, setCart] = useState([]);
+  const [cartLoading, setCartLoading] = useState(true);
 
-  // Read checkout summary from localStorage
   const [summary] = useState(() => {
     try {
-      return (
-        JSON.parse(localStorage.getItem("checkoutSummary")) || {}
-      );
+      return JSON.parse(localStorage.getItem("checkoutSummary")) || {};
     } catch {
       return {};
     }
@@ -38,56 +27,90 @@ function PaymentMethod() {
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState(null);
 
-  // Calculate subtotal from current cart items
-  const subtotal = cart.reduce((sum, item) => {
-    const price = Math.max(0, Number(item.price) || 0);
-    const quantity = Math.max(
-      1,
-      Number(item.quantity) || 1
-    );
+  // FETCH CART FROM BACKEND
+  useEffect(() => {
+    const fetchCart = async () => {
+      try {
+        const token = localStorage.getItem("token");
 
-    return sum + price * quantity;
+        if (!token) {
+          throw new Error("Please login to continue.");
+        }
+
+        const response = await fetch("http://localhost:5000/cart", {
+          headers: {
+            Authorization: "Bearer " + token
+          }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Unable to fetch cart");
+        }
+
+        const cartItems = data.cart?.items || [];
+
+        const formattedCart = cartItems
+          .filter((item) => item.product)
+          .map((item) => ({
+            id: item.product._id,
+            _id: item.product._id,
+            name: item.product.name || "Product",
+            price: Number(item.product.price) || 0,
+            image: item.product.image || "",
+            quantity: Math.max(1, Number(item.quantity) || 1)
+          }));
+
+        console.log("FORMATTED PAYMENT CART:", formattedCart);
+
+        setCart(formattedCart);
+      } catch (err) {
+        setError(err.message || "Unable to load cart.");
+      } finally {
+        setCartLoading(false);
+      }
+    };
+
+    fetchCart();
+  }, []);
+
+  // CALCULATE SUBTOTAL
+  const subtotal = cart.reduce((sum, item) => {
+    return sum + item.price * item.quantity;
   }, 0);
 
-  // Read shipping and discount values
-  const shipping = Math.max(
-    0,
-    Number(summary.shipping) || 0
-  );
+  // SHIPPING
+  const shipping = Math.max(0, Number(summary.shipping) || 0);
 
+  // DISCOUNT
   const discount = Math.min(
     subtotal,
     Math.max(0, Number(summary.discount) || 0)
   );
 
-  // Always calculate the final total
-  const total = Math.max(
-    0,
-    subtotal + shipping - discount
-  );
+  // FINAL TOTAL
+  const total = Math.max(0, subtotal + shipping - discount);
 
-  // Format price in Indian currency format
+  // PRICE FORMAT
   const formatPrice = (price) =>
     Number(price || 0).toLocaleString("en-IN", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
 
-  const handlePayment = (event) => {
+  // HANDLE PAYMENT
+  const handlePayment = async (event) => {
     event.preventDefault();
     setError("");
 
     if (cart.length === 0) {
-      setError(
-        "Your cart is empty. Please add products first."
-      );
+      setError("Your cart is empty. Please add products first.");
       return;
     }
 
     if (!Number.isFinite(total) || total <= 0) {
-      setError(
-        "Invalid order amount. Please check your checkout."
-      );
+      setError("Invalid order amount. Please check your checkout.");
       return;
     }
 
@@ -96,10 +119,9 @@ function PaymentMethod() {
       return;
     }
 
-    // UPI validation
+    // UPI VALIDATION
     if (paymentMethod === "UPI") {
-      const upiPattern =
-        /^[a-zA-Z0-9._-]{2,}@[a-zA-Z0-9.-]+$/;
+      const upiPattern = /^[a-zA-Z0-9._-]{2,}@[a-zA-Z0-9.-]+$/;
 
       if (!upiId.trim()) {
         setError("Please enter your UPI ID.");
@@ -107,23 +129,19 @@ function PaymentMethod() {
       }
 
       if (!upiPattern.test(upiId.trim())) {
-        setError(
-          "Please enter a valid UPI ID format."
-        );
+        setError("Please enter a valid UPI ID format.");
         return;
       }
     }
 
-    // Card validation
+    // CARD VALIDATION
     if (paymentMethod === "CARD") {
       if (!cardName.trim()) {
-        setError(
-          "Please enter the cardholder name."
-        );
+        setError("Please enter the cardholder name.");
         return;
       }
 
-      if (!/^\d{16}$/.test(cardNumber.replace(/\s/g, ""))) {
+      if (!/^\d{16}$/.test(cardNumber)) {
         setError("Enter a 16-digit card number.");
         return;
       }
@@ -152,67 +170,93 @@ function PaymentMethod() {
       }
     }
 
-    setProcessing(true);
+    try {
+      setProcessing(true);
 
-    setTimeout(() => {
-      const order = {
-        orderId: `DEMO-${Date.now()}`,
-        products: cart,
-        items: cart,
-        subtotal,
-        shipping,
-        discount,
-        totalAmount: total,
-        paymentMethod,
-        paymentStatus:
-          paymentMethod === "COD"
-            ? "Pending"
-            : "Paid (Simulated)",
-        orderStatus: "Placed",
-        currentStep: 0,
-        date: new Date().toLocaleDateString("en-IN"),
-        createdAt: new Date().toISOString()
-      };
+      const token = localStorage.getItem("token");
 
-      try {
-        localStorage.setItem(
-          "lastPracticeOrder",
-          JSON.stringify(order)
-        );
+      if (!token) {
+        throw new Error("Please login to continue.");
+      }
 
-        // Save order for order tracking
-        const savedOrders = JSON.parse(
-          localStorage.getItem("orders") || "[]"
-        );
+      // STEP 1: CREATE PAYMENT
+      const paymentResponse = await fetch(
+        "http://localhost:5000/payment/create",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+          },
+          body: JSON.stringify({
+            amount: total,
+            paymentMethod
+          })
+        }
+      );
 
-        const orders = Array.isArray(savedOrders)
-          ? savedOrders
-          : [];
+      const paymentData = await paymentResponse.json();
 
-        orders.push(order);
-
-        localStorage.setItem(
-          "orders",
-          JSON.stringify(orders)
-        );
-
-        localStorage.setItem(
-          "selectedPaymentMethod",
-          paymentMethod
-        );
-
-        setResult(order);
-      } catch {
-        setError(
-          "Unable to save the practice order."
+      if (!paymentResponse.ok || !paymentData.success) {
+        throw new Error(
+          paymentData.message || "Payment creation failed"
         );
       }
 
+      // STEP 2: CREATE ORDER IN MONGODB
+      const orderResponse = await fetch(
+        "http://localhost:5000/orders/create",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+          },
+          body: JSON.stringify({
+            paymentId: paymentData.payment._id,
+            discount
+          })
+        }
+      );
+
+      const orderData = await orderResponse.json();
+
+      if (!orderResponse.ok || !orderData.success) {
+        throw new Error(
+          orderData.message || "Order creation failed"
+        );
+      }
+
+      // STEP 3: SAVE BACKEND ORDER
+      const savedOrder = {
+        ...orderData.order,
+        orderId: orderData.order._id,
+        paymentId: paymentData.payment._id,
+        currentStep: 0,
+        date: new Date().toLocaleDateString("en-IN")
+      };
+
+      localStorage.setItem(
+        "lastPracticeOrder",
+        JSON.stringify(savedOrder)
+      );
+
+      localStorage.setItem(
+        "selectedPaymentMethod",
+        paymentMethod
+      );
+
+      // STEP 4: SHOW SUCCESS
+      setResult(savedOrder);
+
+    } catch (err) {
+      setError(err.message || "Something went wrong.");
+    } finally {
       setProcessing(false);
-    }, 900);
+    }
   };
 
-  // Payment success screen
+  // PAYMENT SUCCESS PAGE
   if (result) {
     return (
       <div className="payment-page">
@@ -224,26 +268,24 @@ function PaymentMethod() {
           <h1>
             {result.paymentMethod === "COD"
               ? "Order Placed!"
-              : "Demo Payment Successful!"}
+              : "Payment Request Saved!"}
           </h1>
 
           <p>
             {result.paymentMethod === "COD"
               ? "Pay when your order arrives."
-              : "This is a simulated payment. No money was charged."}
+              : "Demo payment record saved. No real transaction or money transfer occurred."}
           </p>
 
           <p>
-            Order ID: <strong>{result.orderId}</strong>
+            Order ID: <strong>{result.orderId || result._id}</strong>
           </p>
 
           <p>
             Total: <strong>₹{formatPrice(result.totalAmount)}</strong>
           </p>
 
-          <p>
-            Payment status: {result.paymentStatus}
-          </p>
+          <p>Payment status: {result.paymentStatus}</p>
 
           <button
             type="button"
@@ -284,248 +326,245 @@ function PaymentMethod() {
             </p>
           </div>
 
-          <div className="payment-options">
-            <button
-              type="button"
-              className={`payment-option ${
-                paymentMethod === "UPI" ? "selected" : ""
-              }`}
-              onClick={() => {
-                setPaymentMethod("UPI");
-                setError("");
-              }}
-            >
-              <span className="payment-option-icon">↗</span>
-              <span>
-                <strong>UPI</strong>
-                <small>Google Pay, PhonePe, etc.</small>
-              </span>
-              <span className="payment-radio">
-                {paymentMethod === "UPI" ? "●" : "○"}
-              </span>
-            </button>
+          {cartLoading ? (
+            <p>Loading your cart...</p>
+          ) : (
+            <>
+              <div className="payment-options">
+                <button
+                  type="button"
+                  className={`payment-option ${
+                    paymentMethod === "UPI" ? "selected" : ""
+                  }`}
+                  onClick={() => {
+                    setPaymentMethod("UPI");
+                    setError("");
+                  }}
+                >
+                  <span className="payment-option-icon">↗</span>
+                  <span>
+                    <strong>UPI</strong>
+                    <small>Google Pay, PhonePe, etc.</small>
+                  </span>
+                  <span className="payment-radio">
+                    {paymentMethod === "UPI" ? "●" : "○"}
+                  </span>
+                </button>
 
-            <button
-              type="button"
-              className={`payment-option ${
-                paymentMethod === "CARD" ? "selected" : ""
-              }`}
-              onClick={() => {
-                setPaymentMethod("CARD");
-                setError("");
-              }}
-            >
-              <span className="payment-option-icon">▤</span>
-              <span>
-                <strong>Debit / Credit Card</strong>
-                <small>Visa, Mastercard, etc.</small>
-              </span>
-              <span className="payment-radio">
-                {paymentMethod === "CARD" ? "●" : "○"}
-              </span>
-            </button>
+                <button
+                  type="button"
+                  className={`payment-option ${
+                    paymentMethod === "CARD" ? "selected" : ""
+                  }`}
+                  onClick={() => {
+                    setPaymentMethod("CARD");
+                    setError("");
+                  }}
+                >
+                  <span className="payment-option-icon">▤</span>
+                  <span>
+                    <strong>Debit / Credit Card</strong>
+                    <small>Visa, Mastercard, etc.</small>
+                  </span>
+                  <span className="payment-radio">
+                    {paymentMethod === "CARD" ? "●" : "○"}
+                  </span>
+                </button>
 
-            <button
-              type="button"
-              className={`payment-option ${
-                paymentMethod === "COD" ? "selected" : ""
-              }`}
-              onClick={() => {
-                setPaymentMethod("COD");
-                setError("");
-              }}
-            >
-              <span className="payment-option-icon">₹</span>
-              <span>
-                <strong>Cash on Delivery</strong>
-                <small>Pay when your order arrives</small>
-              </span>
-              <span className="payment-radio">
-                {paymentMethod === "COD" ? "●" : "○"}
-              </span>
-            </button>
-          </div>
+                <button
+                  type="button"
+                  className={`payment-option ${
+                    paymentMethod === "COD" ? "selected" : ""
+                  }`}
+                  onClick={() => {
+                    setPaymentMethod("COD");
+                    setError("");
+                  }}
+                >
+                  <span className="payment-option-icon">₹</span>
+                  <span>
+                    <strong>Cash on Delivery</strong>
+                    <small>Pay when your order arrives</small>
+                  </span>
+                  <span className="payment-radio">
+                    {paymentMethod === "COD" ? "●" : "○"}
+                  </span>
+                </button>
+              </div>
 
-          {paymentMethod === "UPI" && (
-            <div className="payment-form-fields">
-              <label htmlFor="upiId">UPI ID</label>
+              {paymentMethod === "UPI" && (
+                <div className="payment-form-fields">
+                  <label htmlFor="upiId">UPI ID</label>
 
-              <input
-                id="upiId"
-                type="text"
-                placeholder="yourname@bank"
-                value={upiId}
-                onChange={(event) =>
-                  setUpiId(event.target.value)
-                }
-              />
+                  <input
+                    id="upiId"
+                    type="text"
+                    placeholder="yourname@bank"
+                    value={upiId}
+                    onChange={(event) =>
+                      setUpiId(event.target.value)
+                    }
+                  />
 
-              <small>
-                Demo validation only. No UPI transaction will occur.
-              </small>
-            </div>
-          )}
+                  <small>
+                    Demo validation only. No UPI transaction will occur.
+                  </small>
+                </div>
+              )}
 
-          {paymentMethod === "CARD" && (
-            <div className="payment-form-fields">
-              <label htmlFor="cardName">
-                Cardholder Name
-              </label>
-
-              <input
-                id="cardName"
-                type="text"
-                placeholder="Name on card"
-                value={cardName}
-                onChange={(event) =>
-                  setCardName(event.target.value)
-                }
-              />
-
-              <label htmlFor="cardNumber">
-                Card Number
-              </label>
-
-              <input
-                id="cardNumber"
-                type="text"
-                inputMode="numeric"
-                maxLength={16}
-                placeholder="16-digit demo number"
-                value={cardNumber}
-                onChange={(event) =>
-                  setCardNumber(
-                    event.target.value
-                      .replace(/\D/g, "")
-                      .slice(0, 16)
-                  )
-                }
-              />
-
-              <div className="payment-card-row">
-                <div>
-                  <label htmlFor="expiry">
-                    Expiry (MM/YY)
+              {paymentMethod === "CARD" && (
+                <div className="payment-form-fields">
+                  <label htmlFor="cardName">
+                    Cardholder Name
                   </label>
 
                   <input
-                    id="expiry"
+                    id="cardName"
                     type="text"
-                    maxLength={5}
-                    placeholder="MM/YY"
-                    value={expiry}
-                    onChange={(event) => {
-                      let value = event.target.value
-                        .replace(/\D/g, "")
-                        .slice(0, 4);
-
-                      if (value.length > 2) {
-                        value =
-                          value.slice(0, 2) +
-                          "/" +
-                          value.slice(2);
-                      }
-
-                      setExpiry(value);
-                    }}
+                    placeholder="Name on card"
+                    value={cardName}
+                    onChange={(event) =>
+                      setCardName(event.target.value)
+                    }
                   />
-                </div>
 
-                <div>
-                  <label htmlFor="cvv">CVV</label>
+                  <label htmlFor="cardNumber">
+                    Card Number
+                  </label>
 
                   <input
-                    id="cvv"
-                    type="password"
+                    id="cardNumber"
+                    type="text"
                     inputMode="numeric"
-                    maxLength={4}
-                    placeholder="•••"
-                    value={cvv}
+                    maxLength={16}
+                    placeholder="16-digit demo number"
+                    value={cardNumber}
                     onChange={(event) =>
-                      setCvv(
+                      setCardNumber(
                         event.target.value
                           .replace(/\D/g, "")
-                          .slice(0, 4)
+                          .slice(0, 16)
                       )
                     }
                   />
+
+                  <div className="payment-card-row">
+                    <div>
+                      <label htmlFor="expiry">
+                        Expiry (MM/YY)
+                      </label>
+
+                      <input
+                        id="expiry"
+                        type="text"
+                        maxLength={5}
+                        placeholder="MM/YY"
+                        value={expiry}
+                        onChange={(event) => {
+                          let value = event.target.value
+                            .replace(/\D/g, "")
+                            .slice(0, 4);
+
+                          if (value.length > 2) {
+                            value =
+                              value.slice(0, 2) +
+                              "/" +
+                              value.slice(2);
+                          }
+
+                          setExpiry(value);
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="cvv">CVV</label>
+
+                      <input
+                        id="cvv"
+                        type="password"
+                        inputMode="numeric"
+                        maxLength={4}
+                        placeholder="•••"
+                        value={cvv}
+                        onChange={(event) =>
+                          setCvv(
+                            event.target.value
+                              .replace(/\D/g, "")
+                              .slice(0, 4)
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <small>
+                    Use dummy details only. Never enter real card details.
+                  </small>
                 </div>
-              </div>
+              )}
 
-              <small>
-                Use dummy details only. Never enter real card details.
-              </small>
-            </div>
-          )}
+              {paymentMethod === "COD" && (
+                <div className="payment-cod-note">
+                  <strong>Cash on Delivery selected</strong>
+                  <p>
+                    No online payment is needed. Payment remains pending
+                    until the order is delivered and cash is collected.
+                  </p>
+                </div>
+              )}
 
-          {paymentMethod === "COD" && (
-            <div className="payment-cod-note">
-              <strong>Cash on Delivery selected</strong>
-              <p>
-                No online payment is needed. Payment remains pending
-                until the order is delivered and cash is collected.
+              {error && (
+                <p className="payment-error" role="alert">
+                  {error}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                className="payment-primary-btn"
+                disabled={processing || cart.length === 0}
+              >
+                {processing
+                  ? "Processing demo..."
+                  : paymentMethod === "COD"
+                    ? "Place Order"
+                    : `Pay ₹${formatPrice(total)}`}
+              </button>
+
+              <p className="payment-demo-note">
+                Practice mode only · No real payment is processed
               </p>
-            </div>
+            </>
           )}
-
-          {error && (
-            <p className="payment-error" role="alert">
-              {error}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            className="payment-primary-btn"
-            disabled={processing || cart.length === 0}
-          >
-            {processing
-              ? "Processing demo..."
-              : paymentMethod === "COD"
-                ? "Place Order"
-                : `Pay ₹${formatPrice(total)}`}
-          </button>
-
-          <p className="payment-demo-note">
-            Practice mode only · No real payment is processed
-          </p>
         </form>
 
         <aside className="payment-summary">
           <h2>Order Summary</h2>
 
-          {cart.map((item, index) => {
-            const price = Math.max(
-              0,
-              Number(item.price) || 0
-            );
-
-            const quantity = Math.max(
-              1,
-              Number(item.quantity) || 1
-            );
-
-            return (
+          {cartLoading ? (
+            <p>Loading cart...</p>
+          ) : cart.length === 0 ? (
+            <p>Your cart is empty.</p>
+          ) : (
+            cart.map((item, index) => (
               <div
                 className="payment-summary-item"
-                key={item.id ?? item._id ?? index}
+                key={item.id || item._id || index}
               >
                 <div>
-                  <strong>
-                    {item.name || item.productName || "Product"}
-                  </strong>
-
+                  <strong>{item.name}</strong>
                   <small>
-                    ₹{formatPrice(price)} × {quantity}
+                    ₹{formatPrice(item.price)} × {item.quantity}
                   </small>
                 </div>
 
                 <span>
-                  ₹{formatPrice(price * quantity)}
+                  ₹{formatPrice(item.price * item.quantity)}
                 </span>
               </div>
-            );
-          })}
+            ))
+          )}
 
           <div className="payment-summary-row">
             <span>Subtotal</span>

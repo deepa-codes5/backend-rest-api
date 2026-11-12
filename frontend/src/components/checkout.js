@@ -1,6 +1,6 @@
 
 import "./checkout.css";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaArrowLeft,
@@ -15,62 +15,146 @@ import {
 function Checkout() {
   const navigate = useNavigate();
 
-  const [cart, setCart] = useState(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem("cart"));
-      if (!Array.isArray(saved)) return [];
-
-      return saved.map((item) => ({
-        ...item,
-        quantity: Math.max(1, Number(item.quantity) || 1),
-      }));
-    } catch {
-      return [];
-    }
-  });
+  const [cart, setCart] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [updatingProductId, setUpdatingProductId] = useState("");
 
   const [couponInput, setCouponInput] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [couponMessage, setCouponMessage] = useState("");
 
+  const token = localStorage.getItem("token");
+
+  // FETCH CART FROM BACKEND
+  const fetchCart = useCallback(async () => {
+    try {
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      const response = await fetch("http://localhost:5000/cart", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      console.log("CHECKOUT API DATA:", data);
+      console.log("CHECKOUT ITEMS:", data.cart?.items);
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to fetch cart");
+      }
+
+      setCart(data.cart?.items || []);
+      setError("");
+
+    } catch (err) {
+      console.log("Checkout error:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [token, navigate]);
+
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
+    fetchCart();
+  }, [fetchCart]);
 
-  const subtotal = cart.reduce(
-    (sum, item) =>
-      sum + Math.max(0, Number(item.price) || 0) * item.quantity,
-    0
-  );
+  // UPDATE QUANTITY
+  const updateQuantity = async (productId, quantity) => {
+    if (quantity < 1) return;
 
+    try {
+      setUpdatingProductId(productId);
+
+      const response = await fetch("http://localhost:5000/cart/update", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId,
+          quantity,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to update quantity");
+      }
+
+      await fetchCart();
+
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUpdatingProductId("");
+    }
+  };
+
+  // REMOVE PRODUCT
+  const removeItem = async (productId) => {
+    try {
+      setUpdatingProductId(productId);
+
+      const response = await fetch(
+        `http://localhost:5000/cart/remove/${productId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to remove product");
+      }
+
+      await fetchCart();
+
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUpdatingProductId("");
+    }
+  };
+
+  // SUBTOTAL
+  const subtotal = cart.reduce((sum, item) => {
+    return sum + Number(item.product?.price || 0) *
+      Number(item.quantity || 1);
+  }, 0);
+
+  // SHIPPING
   const shippingCharge =
     subtotal === 0 || subtotal >= 1000 ? 0 : 50;
 
+  // DISCOUNT
   const discount = couponApplied ? subtotal * 0.1 : 0;
-  const total = Math.max(0, subtotal + shippingCharge - discount);
 
+  // TOTAL
+  const total = Math.max(
+    0,
+    subtotal + shippingCharge - discount
+  );
+
+  // ITEM COUNT
   const itemCount = cart.reduce(
-    (sum, item) => sum + item.quantity,
+    (sum, item) => sum + Number(item.quantity || 1),
     0
   );
 
-  const updateQuantity = (index, change) => {
-    setCart((previous) =>
-      previous.map((item, i) =>
-        i === index
-          ? {
-            ...item,
-            quantity: Math.max(1, item.quantity + change),
-          }
-          : item
-      )
-    );
-  };
-
-  const removeItem = (index) => {
-    setCart((previous) => previous.filter((_, i) => i !== index));
-  };
-
+  // COUPON
   const applyCoupon = () => {
     if (couponInput.trim().toUpperCase() === "WELCOME10") {
       setCouponApplied(true);
@@ -81,8 +165,12 @@ function Checkout() {
     }
   };
 
-  const continueToAddress = () => {
-    if (cart.length === 0) return;
+  // CONTINUE TO PAYMENT
+  const continueToPayment = () => {
+    if (cart.length === 0) {
+      setError("Your cart is empty!");
+      return;
+    }
 
     localStorage.setItem(
       "checkoutSummary",
@@ -94,14 +182,23 @@ function Checkout() {
       })
     );
 
-    navigate("/shipping-address");
+    navigate("/payment-method");
   };
 
+  // LOADING
+  if (loading) {
+    return (
+      <div className="checkout-page">
+        <p>Loading your checkout...</p>
+      </div>
+    );
+  }
+
+  // EMPTY CART
   if (cart.length === 0) {
     return (
       <div className="checkout-page">
         <button
-          type="button"
           className="checkout-back-btn"
           onClick={() => navigate("/home")}
         >
@@ -114,7 +211,6 @@ function Checkout() {
           <p>Add products before continuing to checkout.</p>
 
           <button
-            type="button"
             className="checkout-primary-btn"
             onClick={() => navigate("/home")}
           >
@@ -127,8 +223,8 @@ function Checkout() {
 
   return (
     <div className="checkout-page">
+
       <button
-        type="button"
         className="checkout-back-btn"
         onClick={() => navigate("/order-review")}
       >
@@ -149,82 +245,100 @@ function Checkout() {
         </div>
       </div>
 
+      {error && (
+        <p style={{ color: "#f87171" }}>{error}</p>
+      )}
+
       <div className="checkout-layout">
+
         <section className="checkout-summary-card">
+
           <div className="checkout-card-heading">
             <div>
               <h2>Order Summary</h2>
               <p>{itemCount} items in your cart</p>
             </div>
-
             <FaShoppingBag className="checkout-bag-icon" />
           </div>
 
           <div className="checkout-products">
-            {cart.map((item, index) => (
-              <div
-                className="checkout-product"
-                key={item.id ?? index}
-              >
-                <div className="checkout-product-image">
-                  {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.name || item.title || "Product"}
-                    />
-                  ) : (
-                    <span>
-                      {(item.name || item.title || "P").charAt(0)}
-                    </span>
-                  )}
-                </div>
 
-                <div className="checkout-product-info">
-                  <h3>{item.name || item.title || "Product"}</h3>
+            {cart.map((item) => {
+              const product = item.product;
 
-                  <p className="checkout-unit-price">
-                    ₹{(Number(item.price) || 0).toFixed(2)} each
-                  </p>
+              if (!product) return null;
 
-                  <div className="checkout-quantity">
-                    <button
-                      type="button"
-                      aria-label="Decrease quantity"
-                      disabled={item.quantity <= 1}
-                      onClick={() => updateQuantity(index, -1)}
-                    >
-                      <FaMinus />
-                    </button>
+              return (
+                <div className="checkout-product" key={product._id}>
 
-                    <span>{item.quantity}</span>
-
-                    <button
-                      type="button"
-                      aria-label="Increase quantity"
-                      onClick={() => updateQuantity(index, 1)}
-                    >
-                      <FaPlus />
-                    </button>
-
-                    <button
-                      type="button"
-                      className="checkout-remove"
-                      aria-label="Remove product"
-                      onClick={() => removeItem(index)}
-                    >
-                      <FaTrashAlt />
-                    </button>
+                  <div className="checkout-product-image">
+                    {product.image ? (
+                      <img src={product.image} alt={product.name} />
+                    ) : (
+                      <span>{product.name?.charAt(0) || "P"}</span>
+                    )}
                   </div>
-                </div>
 
-                <strong className="checkout-item-total">
-                  ₹
-                  {(
-                    (Number(item.price) || 0) * item.quantity
-                  ).toFixed(2)}
-                </strong>
-              </div>
-            ))}
+                  <div className="checkout-product-info">
+                    <h3>{product.name}</h3>
+
+                    <p className="checkout-unit-price">
+                      ₹{Number(product.price).toFixed(2)} each
+                    </p>
+
+                    <div className="checkout-quantity">
+
+                      <button
+                        disabled={
+                          Number(item.quantity) <= 1 ||
+                          updatingProductId === product._id
+                        }
+                        onClick={() =>
+                          updateQuantity(
+                            product._id,
+                            Number(item.quantity) - 1
+                          )
+                        }
+                      >
+                        <FaMinus />
+                      </button>
+
+                      <span>{item.quantity}</span>
+
+                      <button
+                        disabled={updatingProductId === product._id}
+                        onClick={() =>
+                          updateQuantity(
+                            product._id,
+                            Number(item.quantity) + 1
+                          )
+                        }
+                      >
+                        <FaPlus />
+                      </button>
+
+                      <button
+                        className="checkout-remove"
+                        disabled={updatingProductId === product._id}
+                        onClick={() => removeItem(product._id)}
+                      >
+                        <FaTrashAlt />
+                      </button>
+
+                    </div>
+                  </div>
+
+                  <strong className="checkout-item-total">
+                    ₹{(
+                      Number(product.price) *
+                      Number(item.quantity)
+                    ).toFixed(2)}
+                  </strong>
+
+                </div>
+              );
+            })}
+
           </div>
 
           <div className="checkout-coupon">
@@ -242,19 +356,15 @@ function Checkout() {
                 placeholder="Enter coupon code"
               />
 
-              <button type="button" onClick={applyCoupon}>
-                Apply
-              </button>
+              <button onClick={applyCoupon}>Apply</button>
             </div>
 
             {couponMessage && (
-              <p
-                className={
-                  couponApplied
-                    ? "checkout-coupon-success"
-                    : "checkout-coupon-error"
-                }
-              >
+              <p className={
+                couponApplied
+                  ? "checkout-coupon-success"
+                  : "checkout-coupon-error"
+              }>
                 {couponMessage}
               </p>
             )}
@@ -291,9 +401,9 @@ function Checkout() {
           </div>
 
           <button
-            type="button"
             className="checkout-continue-btn"
-            onClick={() => navigate("/payment-method")}
+            onClick={continueToPayment}
+            disabled={updatingProductId !== ""}
           >
             Continue to PaymentMethod <FaArrowRight />
           </button>
@@ -301,6 +411,7 @@ function Checkout() {
           <p className="checkout-secure-note">
             <FaLock /> Demo checkout · No real payment
           </p>
+
         </section>
       </div>
     </div>
