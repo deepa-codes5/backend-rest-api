@@ -14,28 +14,39 @@ const adminMiddleware = require("../middleware/adminMiddleware");
 const router = express.Router();
 
 
-router.get( "/",authMiddleware,studentController.getIndex);
-
 router.get(
     "/me",
     authMiddleware,
-    studentController.getMyProfile
+    studentController.getIndex
 );
-
 
 router.put(
     "/me",
     authMiddleware,
-    studentController.updateMyProfile
+    studentController.updateStudent
 );
-router.post( "/",validateStudentPayload,studentController.createStudent);
-router.put("/2fa/enable",authMiddleware,authController.enable2FA);
+
+
+router.post(
+    "/",
+    validateStudentPayload,
+    studentController.createStudent
+);
+
+
+router.put(
+    "/2fa/enable",
+    authMiddleware,
+    authController.enable2FA
+);
 
 router.put(
     "/2fa/disable",
     authMiddleware,
     authController.disable2FA
-)
+);
+
+
 router.get(
     "/users",
     authMiddleware,
@@ -59,13 +70,13 @@ router.put(
 );
 
 
-
 router.put(
     "/users/:id/unblock",
     authMiddleware,
     adminMiddleware,
     authController.unblockUser
 );
+
 
 router.delete(
     "/users/:id",
@@ -75,15 +86,6 @@ router.delete(
 );
 
 
-
-router.put(
-    "/:id",
-    authMiddleware,
-    studentController.updateStudent
-);
-
-
-
 router.delete(
     "/:id",
     authMiddleware,
@@ -91,6 +93,4 @@ router.delete(
     studentController.deleteStudent
 );
 
-
 module.exports = router;
-

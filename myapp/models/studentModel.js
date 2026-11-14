@@ -10,6 +10,8 @@ const studentSchema = new mongoose.Schema({
 
     mobileNumber: String,
     address: String,
+   
+country: String,
 
     role: {
     type: String,

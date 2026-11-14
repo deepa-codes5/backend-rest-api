@@ -17,6 +17,7 @@ const cartRoute = require("./routes/cartRoute");
 const wishlistRoute = require("./routes/wishlistRoute");
 const paymentRoute = require("./routes/paymentRoute");
 const orderRoute = require("./routes/orderRoute");
+const supportTicketRoute = require("./routes/supportTicketRoute");
 var app = express();
 
 app.use(cors());
@@ -30,24 +31,25 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Routes
+
 app.use('/', indexRouter);
 app.use("/products", productRoute);
 app.use("/cart", cartRoute);
 app.use("/wishlist", wishlistRoute);
 app.use("/payment", paymentRoute);
 app.use("/orders", orderRoute);
-// MongoDB Connection
+app.use("/supportTicket", supportTicketRoute);
+
 mongoose.connect("mongodb://127.0.0.1:27017/studentDB")
     .then(() => console.log("MongoDB connected"))
     .catch((error) => console.log(error));
 
-// 404 Error Handler
+
 app.use(function(req, res, next) {
     next(createError(404));
 });
 
-// Error Handler
+
 app.use(function(err, req, res, next) {
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
@@ -56,10 +58,10 @@ app.use(function(err, req, res, next) {
     res.render('error');
 });
 
-// HTTP Server
+
 const server = http.createServer(app);
 
-// Socket.IO
+
 const io = new Server(server, {
     cors: {
         origin: "*"
@@ -79,7 +81,7 @@ io.on('connection', (socket) => {
     });
 });
 
-// Start Server
+
 server.listen(5000, () => {
     console.log("Server running on port 5000");
 });
