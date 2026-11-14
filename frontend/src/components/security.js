@@ -1,9 +1,11 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 import "./security.css";
 
 function Security() {
+    const API_URL = "http://localhost:5000/studentRoute";
 
     const [security, setSecurity] = useState({
         emailNotifications: true,
@@ -12,32 +14,64 @@ function Security() {
 
     const [show2FA, setShow2FA] = useState(false);
     const [showDisable2FA, setShowDisable2FA] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
 
+    // GET SECURITY STATUS
+    useEffect(() => {
+        const getSecurity = async () => {
+            try {
+                const token = localStorage.getItem("token");
 
-    const handleToggle = (key) => {
-        setSecurity({
-            ...security,
-            [key]: !security[key],
-        });
-    };
+                if (!token) {
+                    toast.error("Please login again");
+                    return;
+                }
 
+                const response = await fetch(`${API_URL}/me`, {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
 
-    
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || "Failed to fetch security");
+                }
+
+                setSecurity((prev) => ({
+                    ...prev,
+                    twoFactor: data.student.twoFactorEnabled || false,
+                }));
+
+            } catch (error) {
+                console.log("Security fetch error:", error);
+                toast.error(error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        getSecurity();
+    }, []);
+
+    // ENABLE 2FA
     const handleEnable2FA = async () => {
-
         try {
+            setSaving(true);
 
             const token = localStorage.getItem("token");
 
             const response = await fetch(
-               " http://localhost:5000/studentRoute/2fa/enable",
+                `${API_URL}/2fa/enable`,
                 {
                     method: "PUT",
-
                     headers: {
-                        "Authorization": `Bearer ${token}`,
-                        "Content-Type": "application/json"
-                    }
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
                 }
             );
 
@@ -45,118 +79,111 @@ function Security() {
 
             console.log("ENABLE 2FA RESPONSE:", data);
 
-
-            if (response.ok) {
-
-                setSecurity({
-                    ...security,
-                    twoFactor: true,
-                });
-
-                setShow2FA(false);
-
-            } else {
-
-                console.log("Enable 2FA failed:", data.message);
-
+            if (!response.ok) {
+                throw new Error(data.message || "Enable 2FA failed");
             }
+
+            setSecurity((prev) => ({
+                ...prev,
+                twoFactor: true,
+            }));
+
+            setShow2FA(false);
+            toast.success("Two-Factor Authentication enabled!");
 
         } catch (error) {
-
             console.log("Enable 2FA error:", error);
-
+            toast.error(error.message);
+        } finally {
+            setSaving(false);
         }
     };
-  
-const handleDisable2FA = async () => {
 
-    try {
+    // DISABLE 2FA
+    const handleDisable2FA = async () => {
+        try {
+            setSaving(true);
 
-        const token = localStorage.getItem("token");
+            const token = localStorage.getItem("token");
 
-        const response = await fetch(
-            "http://localhost:5000/studentRoute/2fa/disable",
-            {
-                method: "PUT",
-
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
+            const response = await fetch(
+                `${API_URL}/2fa/disable`,
+                {
+                    method: "PUT",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
                 }
+            );
+
+            const data = await response.json();
+
+            console.log("DISABLE 2FA RESPONSE:", data);
+
+            if (!response.ok) {
+                throw new Error(data.message || "Disable 2FA failed");
             }
-        );
 
-        const data = await response.json();
-
-        console.log("DISABLE 2FA RESPONSE:", data);
-
-        if (response.ok) {
-
-            setSecurity({
-                ...security,
+            setSecurity((prev) => ({
+                ...prev,
                 twoFactor: false,
-            });
+            }));
 
             setShowDisable2FA(false);
+            toast.success("Two-Factor Authentication disabled!");
 
-        } else {
-
-            console.log("Disable 2FA failed:", data.message);
-
+        } catch (error) {
+            console.log("Disable 2FA error:", error);
+            toast.error(error.message);
+        } finally {
+            setSaving(false);
         }
+    };
 
-    } catch (error) {
-
-        console.log("Disable 2FA error:", error);
-
+    if (loading) {
+        return (
+            <div className="setting-page">
+                <h2>Loading security settings...</h2>
+            </div>
+        );
     }
-};
-
 
     return (
         <div className="setting-page">
 
             <div className="setting-header">
-
-                <h1>settings</h1>
+                <h1>Settings</h1>
 
                 <p>
                     Manage your account, security, MT5, connection and subscription
                 </p>
-
             </div>
-
 
             <div className="setting-container">
 
                 <Link to="/settings">
-                    <button>personal information</button>
+                    <button type="button">Personal Information</button>
                 </Link>
 
-                <button>security</button>
+                <button type="button">Security</button>
 
-                <button>subscription</button>
+                <button type="button">Subscription</button>
 
             </div>
 
-
             <div className="security-list">
 
-
-               
-
+                {/* EMAIL NOTIFICATIONS */}
                 <div className="security-row">
 
                     <div className="security-text">
-
                         <h3>Email Notifications</h3>
 
                         <p>
                             Receive important updates via email.
                         </p>
-
                     </div>
-
 
                     <button
                         type="button"
@@ -166,31 +193,27 @@ const handleDisable2FA = async () => {
                             security.emailNotifications ? "on" : ""
                         }`}
                         onClick={() =>
-                            handleToggle("emailNotifications")
+                            setSecurity((prev) => ({
+                                ...prev,
+                                emailNotifications: !prev.emailNotifications,
+                            }))
                         }
                     >
-
                         <span className="toggle-knob"></span>
-
                     </button>
 
                 </div>
 
-
-              
-
+                {/* TWO FACTOR AUTHENTICATION */}
                 <div className="security-row">
 
                     <div className="security-text">
-
                         <h3>Two-Factor Authentication (2FA)</h3>
 
                         <p>
                             Add an extra layer of security to your account.
                         </p>
-
                     </div>
-
 
                     <button
                         type="button"
@@ -200,47 +223,35 @@ const handleDisable2FA = async () => {
                             security.twoFactor ? "on" : ""
                         }`}
                         onClick={() => {
-
                             if (security.twoFactor) {
-
-                               
                                 setShowDisable2FA(true);
-
                             } else {
-
-                                
                                 setShow2FA(true);
-
                             }
-
                         }}
                     >
-
                         <span className="toggle-knob"></span>
-
                     </button>
 
                 </div>
 
-
-              
-
+                {/* CHANGE PASSWORD */}
                 <div className="security-row">
 
                     <div className="security-text">
-
                         <h3>Change Password</h3>
 
                         <p>
-                            Last changed 3 months ago
+                            Update your account password.
                         </p>
-
                     </div>
-
 
                     <button
                         type="button"
                         className="change-btn"
+                        onClick={() =>
+                            toast.info("Change Password integration is pending")
+                        }
                     >
                         Change
                     </button>
@@ -249,11 +260,8 @@ const handleDisable2FA = async () => {
 
             </div>
 
-
-            
-
+            {/* ENABLE 2FA MODAL */}
             {show2FA && (
-
                 <div className="twofa-modal">
 
                     <div className="twofa-box">
@@ -261,67 +269,28 @@ const handleDisable2FA = async () => {
                         <h2>Enable 2FA</h2>
 
                         <p>
-                            Scan the QR code with your authenticator app
-                            and enter the 6-digit code.
+                            Are you sure you want to enable Two-Factor
+                            Authentication for your account?
                         </p>
-
-
-                        <div className="qr-section">
-
-                            <div className="qr-placeholder">
-                                QR CODE
-                            </div>
-
-
-                            <div className="secret-section">
-
-                                <label>
-                                    Secret Key
-                                </label>
-
-                                <div className="secret-key">
-                                    ABCD EFGH IJKL MNOP
-                                </div>
-
-                            </div>
-
-                        </div>
-
-
-                        <label className="code-label">
-                            Authenticator Code
-                        </label>
-
-
-                        <div className="otp-boxes">
-
-                            <input maxLength="1" />
-                            <input maxLength="1" />
-                            <input maxLength="1" />
-                            <input maxLength="1" />
-                            <input maxLength="1" />
-                            <input maxLength="1" />
-
-                        </div>
-
 
                         <div className="twofa-actions">
 
                             <button
+                                type="button"
                                 className="cancel-btn"
-                                onClick={() =>
-                                    setShow2FA(false)
-                                }
+                                onClick={() => setShow2FA(false)}
+                                disabled={saving}
                             >
                                 Cancel
                             </button>
 
-
                             <button
+                                type="button"
                                 className="enable-btn"
                                 onClick={handleEnable2FA}
+                                disabled={saving}
                             >
-                                Enable 2FA
+                                {saving ? "Enabling..." : "Enable 2FA"}
                             </button>
 
                         </div>
@@ -329,14 +298,10 @@ const handleDisable2FA = async () => {
                     </div>
 
                 </div>
-
             )}
 
-
-           
-
+            {/* DISABLE 2FA MODAL */}
             {showDisable2FA && (
-
                 <div className="twofa-modal">
 
                     <div className="twofa-box">
@@ -344,28 +309,28 @@ const handleDisable2FA = async () => {
                         <h2>Disable 2FA</h2>
 
                         <p>
-                            Enter your authenticator code to disable
-                            two-factor authentication.
+                            Are you sure you want to disable
+                            Two-Factor Authentication?
                         </p>
-
 
                         <div className="twofa-actions">
 
                             <button
+                                type="button"
                                 className="cancel-btn"
-                                onClick={() =>
-                                    setShowDisable2FA(false)
-                                }
+                                onClick={() => setShowDisable2FA(false)}
+                                disabled={saving}
                             >
                                 Cancel
                             </button>
 
-
                             <button
+                                type="button"
                                 className="disable-btn"
-                               onClick={handleDisable2FA}
+                                onClick={handleDisable2FA}
+                                disabled={saving}
                             >
-                                Disable 2FA
+                                {saving ? "Disabling..." : "Disable 2FA"}
                             </button>
 
                         </div>
@@ -373,7 +338,6 @@ const handleDisable2FA = async () => {
                     </div>
 
                 </div>
-
             )}
 
         </div>
@@ -381,4 +345,3 @@ const handleDisable2FA = async () => {
 }
 
 export default Security;
-
