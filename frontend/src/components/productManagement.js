@@ -1,6 +1,7 @@
 
 import "./productManagement.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 
 import {
   FaPlus,
@@ -12,48 +13,69 @@ import {
   FaSave,
 } from "react-icons/fa";
 
+const API_URL = "http://localhost:5000/products";
+
+const initialForm = {
+  name: "",
+  description: "",
+  category: "Electronics",
+  price: "",
+  image: "",
+  stock: "",
+};
+
 function ProductManagement() {
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      name: "Wireless Headphones",
-      category: "Electronics",
-      price: 2499,
-      stock: 15,
-    },
-    {
-      id: 2,
-      name: "Smart Watch",
-      category: "Electronics",
-      price: 1999,
-      stock: 8,
-    },
-    {
-      id: 3,
-      name: "Running Shoes",
-      category: "Footwear",
-      price: 1499,
-      stock: 3,
-    },
-  ]);
-
-  const initialForm = {
-    name: "",
-    category: "Electronics",
-    price: "",
-    stock: "",
-  };
-
+  const [products, setProducts] = useState([]);
   const [form, setForm] = useState(initialForm);
+
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
+
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState(null);
 
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // GET ADMIN TOKEN
+  const getHeaders = () => {
+    const token = localStorage.getItem("token");
+
+    return {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    };
+  };
+
+  // FETCH ALL PRODUCTS
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+
+      const response = await fetch(API_URL);
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to fetch products");
+      }
+
+      setProducts(data.products || []);
+    } catch (error) {
+      console.log("FETCH PRODUCTS ERROR:", error);
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  // SEARCH AND CATEGORY FILTER
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name
-      .toLowerCase()
-      .includes(search.toLowerCase());
+    const matchesSearch =
+      product.name?.toLowerCase().includes(search.toLowerCase());
 
     const matchesCategory =
       categoryFilter === "All" ||
@@ -62,6 +84,7 @@ function ProductManagement() {
     return matchesSearch && matchesCategory;
   });
 
+  // STOCK STATISTICS
   const lowStock = products.filter(
     (product) => product.stock > 0 && product.stock <= 5
   ).length;
@@ -70,97 +93,163 @@ function ProductManagement() {
     (product) => product.stock === 0
   ).length;
 
+  const inStock = products.filter(
+    (product) => product.stock > 5
+  ).length;
+
+  // OPEN ADD FORM
   const openAddForm = () => {
     setForm(initialForm);
     setEditId(null);
     setShowForm(true);
   };
 
+  // OPEN EDIT FORM
   const openEditForm = (product) => {
     setForm({
-      name: product.name,
-      category: product.category,
-      price: String(product.price),
-      stock: String(product.stock),
+      name: product.name || "",
+      description: product.description || "",
+      category: product.category || "Electronics",
+      price: String(product.price ?? ""),
+      image: product.image || "",
+      stock: String(product.stock ?? ""),
     });
 
-    setEditId(product.id);
+    setEditId(product._id);
     setShowForm(true);
   };
 
-  const handleSubmit = (e) => {
+  // ADD / UPDATE PRODUCT
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const name = form.name.trim();
+    const description = form.description.trim();
     const price = Number(form.price);
     const stock = Number(form.stock);
 
     if (
       !name ||
+      !description ||
       !form.category ||
-      form.price.trim() === "" ||
-      form.stock.trim() === "" ||
       !Number.isFinite(price) ||
       !Number.isFinite(stock) ||
       price <= 0 ||
       stock < 0 ||
       !Number.isInteger(stock)
     ) {
-      alert("Please enter valid product details.");
+      toast.error("Please enter valid product details.");
       return;
     }
 
-    if (editId !== null) {
-      setProducts((previous) =>
-        previous.map((product) =>
-          product.id === editId
-            ? { ...product, ...form, name, price, stock }
-            : product
-        )
-      );
-    } else {
-      const newProduct = {
-        id: Date.now(),
-        name,
-        category: form.category,
-        price,
-        stock,
-      };
-
-      setProducts((previous) => [...previous, newProduct]);
+    if (!localStorage.getItem("token")) {
+      toast.error("Admin login required. Please login again.");
+      return;
     }
 
-    setForm(initialForm);
-    setEditId(null);
-    setShowForm(false);
+    const productData = {
+      name,
+      description,
+      price,
+      category: form.category,
+      image: form.image.trim(),
+      stock,
+    };
+
+    try {
+      setSaving(true);
+
+      const isEditing = editId !== null;
+
+      const response = await fetch(
+        isEditing ? `${API_URL}/${editId}` : API_URL,
+        {
+          method: isEditing ? "PUT" : "POST",
+          headers: getHeaders(),
+          body: JSON.stringify(productData),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Product operation failed");
+      }
+
+      toast.success(
+        isEditing
+          ? "Product updated successfully!"
+          : "Product added successfully!"
+      );
+
+      setForm(initialForm);
+      setEditId(null);
+      setShowForm(false);
+
+      await fetchProducts();
+    } catch (error) {
+      console.log("SAVE PRODUCT ERROR:", error);
+      toast.error(error.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const deleteProduct = (id) => {
+  // DELETE PRODUCT
+  const deleteProduct = async (id) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this product?"
     );
 
-    if (confirmed) {
-      setProducts((previous) =>
-        previous.filter((product) => product.id !== id)
-      );
+    if (!confirmed) return;
+
+    if (!localStorage.getItem("token")) {
+      toast.error("Admin login required.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: "DELETE",
+        headers: getHeaders(),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Delete failed");
+      }
+
+      toast.success("Product deleted successfully!");
+
+      await fetchProducts();
+    } catch (error) {
+      console.log("DELETE PRODUCT ERROR:", error);
+      toast.error(error.message);
     }
   };
 
   return (
     <div className="product-management">
+
+      {/* HEADER */}
       <div className="product-header">
         <div>
           <h1>Product Management</h1>
           <p>Manage your store products and inventory</p>
         </div>
 
-        <button className="add-product-btn" onClick={openAddForm}>
+        <button
+          className="add-product-btn"
+          onClick={openAddForm}
+        >
           <FaPlus /> Add Product
         </button>
       </div>
 
+      {/* STATISTICS */}
       <div className="product-stats">
+
         <div className="product-stat-card">
           <span>Total Products</span>
           <h2>{products.length}</h2>
@@ -169,9 +258,7 @@ function ProductManagement() {
 
         <div className="product-stat-card">
           <span>In Stock</span>
-          <h2>
-            {products.filter((product) => product.stock > 5).length}
-          </h2>
+          <h2>{inStock}</h2>
           <FaBox className="stat-icon" />
         </div>
 
@@ -186,25 +273,31 @@ function ProductManagement() {
           <h2>{outOfStock}</h2>
           <FaBox className="stat-icon" />
         </div>
+
       </div>
 
+      {/* ADD / EDIT FORM */}
       {showForm && (
         <div className="product-form-card">
+
           <div className="product-form-header">
-            <h2>{editId !== null ? "Edit Product" : "Add New Product"}</h2>
+            <h2>
+              {editId ? "Edit Product" : "Add New Product"}
+            </h2>
 
             <button
               type="button"
               className="close-form-btn"
               onClick={() => setShowForm(false)}
-              aria-label="Close form"
             >
               <FaTimes />
             </button>
           </div>
 
           <form onSubmit={handleSubmit}>
+
             <div className="product-form-grid">
+
               <div className="product-field">
                 <label>Product Name</label>
                 <input
@@ -263,28 +356,79 @@ function ProductManagement() {
                   required
                 />
               </div>
+
+              <div className="product-field">
+                <label>Product Image URL</label>
+                <input
+                  type="url"
+                  placeholder="Enter image URL"
+                  value={form.image}
+                  onChange={(e) =>
+                    setForm({ ...form, image: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="product-field">
+                <label>Description</label>
+                <input
+                  type="text"
+                  placeholder="Enter product description"
+                  value={form.description}
+                  onChange={(e) =>
+                    setForm({ ...form, description: e.target.value })
+                  }
+                  required
+                />
+              </div>
+
             </div>
 
             <div className="product-form-actions">
-              <button type="button" className="cancel-product-btn" onClick={() => setShowForm(false)}>
+
+              <button
+                type="button"
+                className="cancel-product-btn"
+                onClick={() => {
+                  setShowForm(false);
+                  setForm(initialForm);
+                  setEditId(null);
+                }}
+              >
                 Cancel
               </button>
 
-              <button type="submit" className="save-product-btn">
-                <FaSave /> {editId !== null ? "Update Product" : "Save Product"}
+              <button
+                type="submit"
+                className="save-product-btn"
+                disabled={saving}
+              >
+                <FaSave />
+                {saving
+                  ? "Saving..."
+                  : editId
+                  ? "Update Product"
+                  : "Save Product"}
               </button>
+
             </div>
+
           </form>
         </div>
       )}
 
+      {/* PRODUCT TABLE */}
       <div className="product-table-card">
+
         <div className="product-table-header">
+
           <h2>All Products</h2>
 
           <div className="product-filters">
+
             <div className="product-search">
               <FaSearch />
+
               <input
                 type="text"
                 placeholder="Search products..."
@@ -305,11 +449,14 @@ function ProductManagement() {
               <option value="Home">Home</option>
               <option value="Accessories">Accessories</option>
             </select>
+
           </div>
         </div>
 
         <div className="product-table-wrapper">
+
           <table className="product-table">
+
             <thead>
               <tr>
                 <th>ID</th>
@@ -323,14 +470,35 @@ function ProductManagement() {
             </thead>
 
             <tbody>
-              {filteredProducts.length > 0 ? (
+
+              {loading ? (
+                <tr>
+                  <td colSpan="7" className="no-products">
+                    Loading products...
+                  </td>
+                </tr>
+              ) : filteredProducts.length > 0 ? (
+
                 filteredProducts.map((product) => (
-                  <tr key={product.id}>
-                    <td>#{product.id}</td>
-                    <td className="product-name-cell">{product.name}</td>
+
+                  <tr key={product._id}>
+
+                    <td>
+                      #{product._id.slice(-6)}
+                    </td>
+
+                    <td className="product-name-cell">
+                      {product.name}
+                    </td>
+
                     <td>{product.category}</td>
-                    <td>₹{product.price.toLocaleString("en-IN")}</td>
+
+                    <td>
+                      ₹{Number(product.price).toLocaleString("en-IN")}
+                    </td>
+
                     <td>{product.stock}</td>
+
                     <td>
                       <span
                         className={`product-status ${
@@ -348,12 +516,13 @@ function ProductManagement() {
                           : "In Stock"}
                       </span>
                     </td>
+
                     <td>
                       <div className="product-action-buttons">
+
                         <button
                           className="edit-product-btn"
                           onClick={() => openEditForm(product)}
-                          aria-label={`Edit ${product.name}`}
                           title="Edit product"
                         >
                           <FaEdit />
@@ -361,30 +530,38 @@ function ProductManagement() {
 
                         <button
                           className="delete-product-btn"
-                          onClick={() => deleteProduct(product.id)}
-                          aria-label={`Delete ${product.name}`}
+                          onClick={() => deleteProduct(product._id)}
                           title="Delete product"
                         >
                           <FaTrash />
                         </button>
+
                       </div>
                     </td>
+
                   </tr>
+
                 ))
+
               ) : (
+
                 <tr>
                   <td colSpan="7" className="no-products">
                     No products found.
                   </td>
                 </tr>
+
               )}
+
             </tbody>
+
           </table>
         </div>
 
         <p className="product-table-footer">
           Showing {filteredProducts.length} of {products.length} products
         </p>
+
       </div>
     </div>
   );
