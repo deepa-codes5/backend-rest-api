@@ -3,13 +3,13 @@ const Order = require("../models/orderModel");
 const Cart = require("../models/cartModel");
 const Payment = require("../models/paymentModel");
 
-// CREATE ORDER
+
 const createOrder = async (req, res) => {
   try {
     const userId = req.user.id;
     const { paymentId, discount = 0 } = req.body;
 
-    // 1. Validate payment ID
+    
     if (!paymentId) {
       return res.status(400).json({
         success: false,
@@ -17,7 +17,7 @@ const createOrder = async (req, res) => {
       });
     }
 
-    // 2. Get user's cart
+  
     const cart = await Cart.findOne({ user: userId })
       .populate("items.product");
 
@@ -28,7 +28,6 @@ const createOrder = async (req, res) => {
       });
     }
 
-    // 3. Prepare order items
     const orderItems = cart.items
       .filter(item => item.product)
       .map(item => ({
@@ -46,16 +45,16 @@ const createOrder = async (req, res) => {
       });
     }
 
-    // 4. Calculate subtotal using database prices
+   
     const subtotal = orderItems.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0
     );
 
-    // 5. Calculate shipping
+  
     const shipping = subtotal >= 1000 ? 0 : 50;
 
-    // 6. Validate discount
+   
     const validDiscount = Math.min(
       subtotal,
       Math.max(0, Number(discount) || 0)
@@ -70,7 +69,7 @@ const createOrder = async (req, res) => {
       });
     }
 
-    // 7. Find payment
+    
     const payment = await Payment.findOne({
       _id: paymentId,
       user: userId
@@ -104,7 +103,7 @@ const createOrder = async (req, res) => {
       });
     }
 
-    // 8. Create order
+    
     const order = await Order.create({
       user: userId,
       items: orderItems,
@@ -118,11 +117,11 @@ const createOrder = async (req, res) => {
       orderStatus: "Placed"
     });
 
-    // 9. Link payment with order
+   
     payment.orderId = order._id;
     await payment.save();
 
-    // 10. Clear cart
+ 
     cart.items = [];
     await cart.save();
 
@@ -141,7 +140,6 @@ const createOrder = async (req, res) => {
 };
 
 
-// GET LOGGED-IN USER ORDERS
 const getMyOrders = async (req, res) => {
   try {
     const orders = await Order.find({
@@ -166,7 +164,7 @@ const getMyOrders = async (req, res) => {
 };
 
 
-// GET SINGLE ORDER
+
 const getOrderById = async (req, res) => {
   try {
     const order = await Order.findOne({
@@ -197,8 +195,92 @@ const getOrderById = async (req, res) => {
 };
 
 
+const getAllOrders = async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .populate("user", "name email mobileNumber")
+      .populate("items.product", "name image")
+      .populate("payment")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: orders.length,
+      orders
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+
+
+const updateOrderStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const { id } = req.params;
+
+    const validStatuses = [
+      "Placed",
+      "Confirmed",
+      "Shipped",
+      "Out for Delivery",
+      "Delivered",
+      "Cancelled"
+    ];
+
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid order status"
+      });
+    }
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found"
+      });
+    }
+
+    if (order.orderStatus === "Cancelled" ||
+        order.orderStatus === "Delivered") {
+      return res.status(400).json({
+        success: false,
+        message: "This order cannot be updated"
+      });
+    }
+
+    order.orderStatus = status;
+    await order.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Order status updated successfully",
+      order
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+
+
 module.exports = {
   createOrder,
   getMyOrders,
-  getOrderById
+  getOrderById,
+  getAllOrders,
+  updateOrderStatus
 };
+

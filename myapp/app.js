@@ -18,6 +18,7 @@ const wishlistRoute = require("./routes/wishlistRoute");
 const paymentRoute = require("./routes/paymentRoute");
 const orderRoute = require("./routes/orderRoute");
 const supportTicketRoute = require("./routes/supportTicketRoute");
+const adminOrderRoute = require("./routes/adminOrderRoute");
 var app = express();
 
 app.use(cors());
@@ -39,6 +40,9 @@ app.use("/wishlist", wishlistRoute);
 app.use("/payment", paymentRoute);
 app.use("/orders", orderRoute);
 app.use("/supportTicket", supportTicketRoute);
+
+
+app.use("/admin/orders", adminOrderRoute);
 
 mongoose.connect("mongodb://127.0.0.1:27017/studentDB")
     .then(() => console.log("MongoDB connected"))
