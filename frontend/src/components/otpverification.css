@@ -304,6 +304,74 @@
   }
 }
 
+/* Order API messages */
+.order-message {
+  padding: 12px 16px;
+  margin-bottom: 18px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.success-message {
+  color: #86efac;
+  background: #163625;
+  border: 1px solid #276749;
+}
+
+.error-message {
+  color: #fca5a5;
+  background: #451f29;
+  border: 1px solid #7f1d1d;
+}
+
+/* Payment status */
+.payment-badge.success {
+  color: #86efac;
+  background: #163625;
+}
+
+.payment-badge.failed {
+  color: #fca5a5;
+  background: #451f29;
+}
+
+/* Payment method */
+.order-payment-method {
+  margin-top: 5px;
+  color: #aaa1b5;
+  font-size: 11px;
+}
+
+/* Backend order statuses */
+.status-select.placed {
+  color: #fcd34d;
+}
+
+.status-select.confirmed {
+  color: #c4b5fd;
+}
+
+.status-select.shipped {
+  color: #93c5fd;
+}
+
+.status-select.out-for-delivery {
+  color: #67e8f9;
+}
+
+.status-select.delivered {
+  color: #86efac;
+}
+
+.status-select.cancelled {
+  color: #fca5a5;
+}
+
+.status-select:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 
 @media (max-width: 400px) {
 
