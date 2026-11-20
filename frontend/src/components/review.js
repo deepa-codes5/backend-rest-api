@@ -6,7 +6,8 @@ import {
   FaArrowLeft,
   FaTrash,
   FaShoppingBag,
-  FaArrowRight
+  FaArrowRight,
+  FaShieldAlt
 } from "react-icons/fa";
 
 function OrderReview() {
@@ -42,7 +43,6 @@ function OrderReview() {
 
       setCart(data.cart?.items || []);
       setError("");
-
     } catch (err) {
       console.log("Review cart error:", err);
       setError(err.message);
@@ -61,6 +61,7 @@ function OrderReview() {
 
     try {
       setUpdatingProductId(productId);
+      setError("");
 
       const response = await fetch("http://localhost:5000/cart/update", {
         method: "PUT",
@@ -81,7 +82,6 @@ function OrderReview() {
       }
 
       setCart(data.cart?.items || []);
-
     } catch (err) {
       console.log("Update quantity error:", err);
       setError(err.message);
@@ -94,6 +94,7 @@ function OrderReview() {
   const removeProduct = async (productId) => {
     try {
       setUpdatingProductId(productId);
+      setError("");
 
       const response = await fetch(
         `http://localhost:5000/cart/remove/${productId}`,
@@ -112,7 +113,6 @@ function OrderReview() {
       }
 
       setCart(data.cart?.items || []);
-
     } catch (err) {
       console.log("Remove product error:", err);
       setError(err.message);
@@ -151,7 +151,10 @@ function OrderReview() {
   if (loading) {
     return (
       <div className="review-page">
-        <p>Loading your order...</p>
+        <div className="review-loading">
+          <div className="review-loader"></div>
+          <p>Loading your order...</p>
+        </div>
       </div>
     );
   }
@@ -168,12 +171,18 @@ function OrderReview() {
         </button>
 
         <div className="review-empty">
-          <FaShoppingBag className="empty-icon" />
+          <div className="empty-icon-wrapper">
+            <FaShoppingBag className="empty-icon" />
+          </div>
+
           <h2>Your order is empty</h2>
-          <p>Add products to your cart before reviewing your order.</p>
+
+          <p>
+            Add products to your cart before reviewing your order.
+          </p>
 
           <button onClick={() => navigate("/home")}>
-            Continue Shopping
+            Continue Shopping <FaArrowRight />
           </button>
         </div>
       </div>
@@ -195,18 +204,26 @@ function OrderReview() {
         <div className="review-heading">
           <span>ORDER SUMMARY</span>
           <h1>Review Your Order</h1>
-          <p>Check your products before proceeding to checkout.</p>
+          <p>
+            Check your products before proceeding to checkout.
+          </p>
         </div>
 
         {error && (
-          <p style={{ color: "#f87171", marginBottom: "15px" }}>
+          <div className="review-error">
             {error}
-          </p>
+          </div>
         )}
 
         <div className="review-layout">
 
+          {/* PRODUCT LIST */}
           <div className="review-products">
+
+            <div className="review-section-heading">
+              <h2>Your Items</h2>
+              <span>{totalQuantity} Items</span>
+            </div>
 
             {cart.map((item) => {
               const product = item.product;
@@ -218,10 +235,12 @@ function OrderReview() {
                   className="review-product"
                   key={product._id}
                 >
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                  />
+                  <div className="review-image-wrapper">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                    />
+                  </div>
 
                   <div className="review-product-info">
                     <h3>{product.name}</h3>
@@ -247,7 +266,9 @@ function OrderReview() {
                         −
                       </button>
 
-                      <span>{item.quantity}</span>
+                      <span>
+                        {item.quantity}
+                      </span>
 
                       <button
                         onClick={() =>
@@ -278,6 +299,7 @@ function OrderReview() {
                       onClick={() => removeProduct(product._id)}
                       disabled={updatingProductId === product._id}
                       aria-label="Remove product"
+                      title="Remove product"
                     >
                       <FaTrash />
                     </button>
@@ -289,9 +311,13 @@ function OrderReview() {
 
           </div>
 
+          {/* PRICE SUMMARY */}
           <aside className="review-summary">
 
-            <h2>Price Details</h2>
+            <div className="summary-title">
+              <h2>Price Details</h2>
+              <span>{cart.length} Products</span>
+            </div>
 
             <div className="summary-row">
               <span>Items ({totalQuantity})</span>
@@ -299,7 +325,7 @@ function OrderReview() {
             </div>
 
             <div className="summary-row">
-              <span>Delivery</span>
+              <span>Delivery Charges</span>
               <span className="free-delivery">FREE</span>
             </div>
 
@@ -321,6 +347,11 @@ function OrderReview() {
             >
               Proceed to Checkout <FaArrowRight />
             </button>
+
+            <div className="review-secure">
+              <FaShieldAlt />
+              <span>Secure checkout experience</span>
+            </div>
 
             <p className="review-note">
               Please verify your order before continuing.
