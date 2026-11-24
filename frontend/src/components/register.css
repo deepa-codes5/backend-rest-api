@@ -228,6 +228,53 @@
 }
 
 
+/* =====================================
+   HOME PAGE COMMON BUTTON THEME
+===================================== */
+
+/* Register Button */
+.register-box button {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  color: #ffffff;
+  border: none;
+  transition: filter 0.2s ease;
+}
+
+.register-box button:hover {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  filter: brightness(1.12);
+  transform: none;
+  box-shadow: none;
+}
+
+.register-box button:active {
+  transform: none;
+}
+
+/* Input Focus */
+.register-box input:focus {
+  border-color: #c084fc;
+  box-shadow: 0 0 18px rgba(192, 132, 252, 0.25);
+}
+
+/* Heading Underline */
+.register-box h1::after {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+}
+
+/* Login Link */
+.register-box p a {
+  color: #e879f9;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.register-box p a:hover {
+  color: #f0abfc;
+  text-decoration: underline;
+}
+
+
 
 @keyframes cardEnter {
   from {
@@ -272,9 +319,7 @@
 }
 
 
-/* =====================
-   Responsive
-   ===================== */
+
 
 @media (max-width: 768px) {
 

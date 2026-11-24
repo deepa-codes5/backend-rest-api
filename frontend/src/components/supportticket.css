@@ -167,7 +167,103 @@
   background: #dcfce7;
   color: #16a34a;
 }
+/* Login Page Style - Animated Corner Glow */
 
+.support-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #17121f;
+}
+
+.support-page::before {
+  content: "";
+  position: fixed;
+  width: 350px;
+  height: 350px;
+  background: #f43f5e;
+  border-radius: 50%;
+  top: -120px;
+  left: -100px;
+  filter: blur(90px);
+  opacity: 0.55;
+  animation: supportPinkGlow 7s ease-in-out infinite alternate;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.support-page::after {
+  content: "";
+  position: fixed;
+  width: 350px;
+  height: 350px;
+  background: #f97316;
+  border-radius: 50%;
+  right: -120px;
+  bottom: -120px;
+  filter: blur(90px);
+  opacity: 0.5;
+  animation: supportOrangeGlow 8s ease-in-out infinite alternate;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* =====================================
+   HOME PAGE COMMON BUTTON THEME
+===================================== */
+
+/* Submit Ticket Button */
+.ticket-form button {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  color: #ffffff;
+  border: none;
+  transition: filter 0.2s ease;
+}
+
+.ticket-form button:hover {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  filter: brightness(1.12);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Form Input Focus */
+.ticket-form input:focus,
+.ticket-form select:focus,
+.ticket-form textarea:focus {
+  outline: none;
+  border-color: #c084fc;
+  box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.2);
+}
+
+/* Ticket Header Accent */
+.ticket-header span {
+  color: #e879f9;
+}
+
+/* Keyboard Focus */
+.ticket-form button:focus-visible {
+  outline: 2px solid #d8b4fe;
+  outline-offset: 3px;
+}
+
+@keyframes supportPinkGlow {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(120px, 80px);
+  }
+}
+
+@keyframes supportOrangeGlow {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(-100px, -80px);
+  }
+}
 
 
 @media (max-width: 800px) {

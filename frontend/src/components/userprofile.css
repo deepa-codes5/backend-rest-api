@@ -433,6 +433,95 @@
   font-size: 12px;
 }
 
+/* =====================================
+   HOME PAGE COMMON THEME
+===================================== */
+
+/* Primary Buttons */
+.userprofile-edit-btn,
+.userprofile-primary {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  color: #ffffff;
+  border: none;
+  transition: filter 0.2s ease;
+}
+
+.userprofile-edit-btn:hover,
+.userprofile-primary:hover {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  filter: brightness(1.12);
+  opacity: 1;
+}
+
+/* Secondary Buttons */
+.userprofile-back,
+.userprofile-secondary {
+  background: #251a36;
+  border: 1px solid #68437e;
+  color: #f0abfc;
+  transition: 0.2s ease;
+}
+
+.userprofile-back:hover,
+.userprofile-secondary:hover {
+  background: #38234e;
+  border-color: #c084fc;
+  color: #ffffff;
+}
+
+/* Brand and Accent Colors */
+.userprofile-brand,
+.userprofile-eyebrow,
+.userprofile-avatar {
+  color: #e879f9;
+}
+
+/* Menu Cards */
+.userprofile-menu-card:hover {
+  border-color: #c084fc;
+  background: #251a36;
+}
+
+.userprofile-menu-icon {
+  background: #302038;
+  color: #e879f9;
+}
+
+/* Input Focus */
+.userprofile-field input:focus,
+.userprofile-address-form textarea:focus {
+  border-color: #c084fc;
+  box-shadow: 0 0 12px rgba(192, 132, 252, 0.2);
+}
+
+/* Logout Button */
+.userprofile-logout {
+  background: #251a36;
+  border-color: #68437e;
+}
+
+.userprofile-logout:hover {
+  border-color: #fb7185;
+  background: #38234e;
+}
+
+/* Message */
+.userprofile-message {
+  background: #251a36;
+  border-color: #68437e;
+  color: #f0abfc;
+}
+
+.userprofile-message button {
+  color: #f0abfc;
+}
+
+/* Focus Accessibility */
+.userprofile-page button:focus-visible {
+  outline: 2px solid #d8b4fe;
+  outline-offset: 3px;
+}
+
 @media (max-width: 650px) {
   .userprofile-topbar {
     padding: 13px 16px;

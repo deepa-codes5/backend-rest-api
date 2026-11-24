@@ -313,3 +313,77 @@
 .disable-btn:hover {
     background: #dc2626;
 }
+
+
+/* =====================================
+   HOME PAGE COMMON BUTTON THEME
+===================================== */
+
+/* Two Factor Toggle */
+.toggle.on {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+}
+
+/* Change Buttons */
+.change-btn {
+  background: #251a36;
+  border: 1px solid #68437e;
+  color: #f0abfc;
+  transition: 0.2s ease;
+}
+
+.change-btn:hover {
+  background: #38234e;
+  border-color: #c084fc;
+  color: #ffffff;
+}
+
+/* Cancel Button */
+.cancel-btn {
+  background: #251a36;
+  border: 1px solid #68437e;
+  color: #f0abfc;
+}
+
+.cancel-btn:hover {
+  background: #38234e;
+  border-color: #c084fc;
+  color: #ffffff;
+}
+
+/* Enable 2FA Button */
+.enable-btn {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  color: #ffffff;
+  border: none;
+  transition: filter 0.2s ease;
+}
+
+.enable-btn:hover {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  filter: brightness(1.12);
+}
+
+/* Disable 2FA Button - Keep Danger Color */
+.disable-btn {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.disable-btn:hover {
+  background: #dc2626;
+}
+
+/* OTP Input Focus */
+.otp-boxes input:focus {
+  border-color: #c084fc;
+  box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.2);
+}
+
+/* Keyboard Focus */
+.security-row button:focus-visible,
+.twofa-box button:focus-visible,
+.otp-boxes input:focus-visible {
+  outline: 2px solid #d8b4fe;
+  outline-offset: 3px;
+}

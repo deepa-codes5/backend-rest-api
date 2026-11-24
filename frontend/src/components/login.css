@@ -226,6 +226,47 @@
 
 
 
+.login-box button {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  color: #ffffff;
+  border: none;
+  transition: filter 0.2s ease;
+}
+
+.login-box button:hover {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  filter: brightness(1.12);
+  transform: none;
+  box-shadow: none;
+}
+
+.login-box button:active {
+  transform: none;
+}
+
+
+.login-box input:focus {
+  border-color: #c084fc;
+  box-shadow: 0 0 18px rgba(192, 132, 252, 0.25);
+}
+
+.login-box p a {
+  color: #e879f9;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.login-box p a:hover {
+  color: #f0abfc;
+  text-decoration: underline;
+}
+
+
+.login-box h1::after {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+}
+
+
 @keyframes cardEnter {
   from {
     opacity: 0;

@@ -346,7 +346,142 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+/* Login Page Style - Corner Glow Animation */
 
+.tracking-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #17121f;
+}
+
+.tracking-page::before {
+  content: "";
+  position: fixed;
+  width: 350px;
+  height: 350px;
+  background: #f43f5e;
+  border-radius: 50%;
+  top: -120px;
+  left: -100px;
+  filter: blur(90px);
+  opacity: 0.55;
+  animation: trackingPinkGlow 7s ease-in-out infinite alternate;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.tracking-page::after {
+  content: "";
+  position: fixed;
+  width: 350px;
+  height: 350px;
+  background: #f97316;
+  border-radius: 50%;
+  right: -120px;
+  bottom: -120px;
+  filter: blur(90px);
+  opacity: 0.5;
+  animation: trackingOrangeGlow 8s ease-in-out infinite alternate;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* =====================================
+   HOME PAGE COMMON BUTTON THEME
+===================================== */
+
+/* Back Button */
+.tracking-back {
+  background: #251a36;
+  border: 1px solid #68437e;
+  color: #f0abfc;
+}
+
+.tracking-back:hover {
+  background: #38234e;
+  border-color: #c084fc;
+  color: #ffffff;
+}
+
+/* Tracking Accent Colors */
+.tracking-label,
+.tracking-step-count,
+.tracking-current-label {
+  color: #e879f9;
+}
+
+/* Completed Timeline */
+.tracking-step.completed:not(:last-child)::before {
+  background: linear-gradient(180deg, #9333ea, #ec4899);
+}
+
+.tracking-step.completed .tracking-step-icon {
+  background: #302038;
+  border-color: #c084fc;
+  color: #e879f9;
+}
+
+.tracking-step.current .tracking-step-icon {
+  box-shadow: 0 0 0 4px rgba(192, 132, 252, 0.15);
+}
+
+/* Current Status Box */
+.tracking-current-box {
+  background: #251a36;
+  border-color: #68437e;
+  color: #e879f9;
+}
+
+/* Demo Buttons */
+.tracking-demo-buttons button {
+  background: #251a36;
+  border: 1px solid #68437e;
+  color: #f0abfc;
+}
+
+.tracking-demo-buttons button:hover:not(:disabled) {
+  background: #38234e;
+  border-color: #c084fc;
+  color: #ffffff;
+}
+
+/* Demo Primary Button */
+.tracking-demo-buttons button:last-child {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  border: none;
+  color: #ffffff;
+}
+
+.tracking-demo-buttons button:last-child:hover:not(:disabled) {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  filter: brightness(1.12);
+  transform: none;
+}
+
+/* Keyboard Focus */
+.tracking-page button:focus-visible {
+  outline: 2px solid #d8b4fe;
+  outline-offset: 3px;
+}
+
+@keyframes trackingPinkGlow {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(120px, 80px);
+  }
+}
+
+@keyframes trackingOrangeGlow {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(-100px, -80px);
+  }
+}
 @media (max-width: 768px) {
   .tracking-page {
     padding: 20px 4%;

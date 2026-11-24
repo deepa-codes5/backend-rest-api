@@ -151,7 +151,121 @@
 .save-btn:active{
     transform: translateY(0);
 }
+/* Login Page Style - Animated Corner Glow */
 
+.setting-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #17121f;
+}
+
+.setting-page::before {
+  content: "";
+  position: fixed;
+  width: 350px;
+  height: 350px;
+  background: #f43f5e;
+  border-radius: 50%;
+  top: -120px;
+  left: -100px;
+  filter: blur(90px);
+  opacity: 0.55;
+  animation: settingPinkGlow 7s ease-in-out infinite alternate;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.setting-page::after {
+  content: "";
+  position: fixed;
+  width: 350px;
+  height: 350px;
+  background: #f97316;
+  border-radius: 50%;
+  right: -120px;
+  bottom: -120px;
+  filter: blur(90px);
+  opacity: 0.5;
+  animation: settingOrangeGlow 8s ease-in-out infinite alternate;
+  z-index: -1;
+  pointer-events: none;
+}
+
+
+/* =====================================
+   HOME PAGE COMMON BUTTON THEME
+===================================== */
+
+/* Settings Navigation Buttons */
+.setting-container button {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  color: #ffffff;
+  border: none;
+  transition: filter 0.2s ease;
+}
+
+.setting-container button:hover {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  filter: brightness(1.12);
+  transform: none;
+  box-shadow: none;
+}
+
+.setting-container button:active {
+  transform: none;
+}
+
+/* Save Button */
+.save-btn {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  color: #ffffff;
+  border: none;
+  transition: filter 0.2s ease;
+}
+
+.save-btn:hover {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  filter: brightness(1.12);
+  transform: none;
+  box-shadow: none;
+}
+
+.save-btn:active {
+  transform: none;
+}
+
+/* Input Focus */
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #c084fc;
+  box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.2);
+}
+
+/* Keyboard Focus */
+.setting-container button:focus-visible,
+.save-btn:focus-visible {
+  outline: 2px solid #d8b4fe;
+  outline-offset: 3px;
+}
+
+@keyframes settingPinkGlow {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(120px, 80px);
+  }
+}
+
+@keyframes settingOrangeGlow {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(-100px, -80px);
+  }
+}
 
 @media (max-width: 600px){
     .info-form{

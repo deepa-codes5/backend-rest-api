@@ -185,7 +185,7 @@ function Checkout() {
     navigate("/payment-method");
   };
 
-  // LOADING
+ 
   if (loading) {
     return (
       <div className="checkout-page">
@@ -194,7 +194,7 @@ function Checkout() {
     );
   }
 
-  // EMPTY CART
+  
   if (cart.length === 0) {
     return (
       <div className="checkout-page">

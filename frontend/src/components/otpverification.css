@@ -372,6 +372,57 @@
   cursor: not-allowed;
 }
 
+/* =====================================
+   HOME PAGE COMMON BUTTON THEME
+===================================== */
+
+/* OTP Verify Button */
+.otp-box button {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  color: #ffffff;
+  border: none;
+  transition: filter 0.2s ease;
+}
+
+.otp-box button:hover {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  filter: brightness(1.12);
+  transform: none;
+  box-shadow: none;
+}
+
+.otp-box button:active {
+  transform: none;
+}
+
+/* OTP Input Focus */
+.otp-box input:focus {
+  border-color: #c084fc;
+  box-shadow: 0 0 18px rgba(192, 132, 252, 0.25);
+}
+
+/* Heading Underline */
+.otp-box h1::after {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+}
+
+/* Resend OTP Text */
+.resend-text span {
+  color: #e879f9;
+}
+
+.resend-text span:hover {
+  color: #f0abfc;
+}
+
+/* Keyboard Focus */
+.otp-box button:focus-visible,
+.otp-box input:focus-visible,
+.resend-text span:focus-visible {
+  outline: 2px solid #d8b4fe;
+  outline-offset: 3px;
+}
+
 
 @media (max-width: 400px) {
 
