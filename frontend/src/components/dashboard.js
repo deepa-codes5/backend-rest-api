@@ -1,6 +1,8 @@
 
 import "./dashboard.css";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+
 import {
   FaThLarge,
   FaUsers,
@@ -18,6 +20,69 @@ import {
 function AdminDashboard() {
   const navigate = useNavigate();
 
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalProducts: 0,
+    totalOrders: 0,
+    totalRevenue: 0,
+  });
+
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // FETCH DASHBOARD DATA
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          throw new Error("Please login again.");
+        }
+
+        const response = await fetch(
+          "http://localhost:5000/admin/dashboard",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(
+            data.message || "Failed to fetch dashboard data"
+          );
+        }
+
+        setStats(data.stats);
+        setRecentOrders(data.recentOrders || []);
+        setError("");
+
+      } catch (err) {
+        console.error("Dashboard Error:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  // FORMAT CURRENCY
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(Number(amount) || 0);
+  };
+
   const menuItems = [
     { name: "Dashboard", icon: <FaThLarge />, path: "/admin-dashboard" },
     { name: "Users", icon: <FaUsers />, path: "/admin-users" },
@@ -28,61 +93,26 @@ function AdminDashboard() {
     { name: "Settings", icon: <FaCog />, path: "/admin-settings" },
   ];
 
-  const stats = [
+  const dashboardStats = [
     {
       title: "Total Users",
-      value: "1,250",
-      change: "+12.5%",
+      value: stats.totalUsers,
       icon: <FaUsers />,
     },
     {
       title: "Total Products",
-      value: "320",
-      change: "+8.2%",
+      value: stats.totalProducts,
       icon: <FaBox />,
     },
     {
       title: "Total Orders",
-      value: "856",
-      change: "+15.3%",
+      value: stats.totalOrders,
       icon: <FaShoppingBag />,
     },
     {
       title: "Total Revenue",
-      value: "₹1,25,000",
-      change: "+10.8%",
+      value: formatCurrency(stats.totalRevenue),
       icon: <FaDollarSign />,
-    },
-  ];
-
-  const recentOrders = [
-    {
-      id: "#ORD001",
-      customer: "Customer One",
-      product: "Wireless Headphones",
-      amount: "₹2,499",
-      status: "Delivered",
-    },
-    {
-      id: "#ORD002",
-      customer: "Customer Two",
-      product: "Smart Watch",
-      amount: "₹3,999",
-      status: "Pending",
-    },
-    {
-      id: "#ORD003",
-      customer: "Customer Three",
-      product: "Running Shoes",
-      amount: "₹1,899",
-      status: "Processing",
-    },
-    {
-      id: "#ORD004",
-      customer: "Customer Four",
-      product: "Laptop Bag",
-      amount: "₹999",
-      status: "Cancelled",
     },
   ];
 
@@ -168,19 +198,29 @@ function AdminDashboard() {
           </div>
         </header>
 
+        {/* DASHBOARD STATS */}
+
+        {error && (
+          <p style={{ color: "#ff6b6b", marginBottom: "15px" }}>
+            {error}
+          </p>
+        )}
+
         <section className="admin-stats">
-          {stats.map((stat) => (
+          {dashboardStats.map((stat) => (
             <div className="admin-stat-card" key={stat.title}>
               <div className="admin-stat-top">
                 <span>{stat.title}</span>
                 <div className="admin-stat-icon">{stat.icon}</div>
               </div>
 
-              <h2>{stat.value}</h2>
+              <h2>
+                {loading ? "..." : stat.value}
+              </h2>
 
               <p className="admin-stat-change">
-                <FaArrowUp /> {stat.change}
-                <span> compared to last month</span>
+                <FaArrowUp />
+                <span> Live database data</span>
               </p>
             </div>
           ))}
@@ -230,9 +270,7 @@ function AdminDashboard() {
             <button
               type="button"
               className="admin-quick-item"
-              onClick={() =>
-                alert("User Management page will be added next.")
-              }
+              onClick={() => alert("User Management page will be added next.")}
             >
               <FaUsers />
               <span>Manage Users</span>
@@ -260,6 +298,8 @@ function AdminDashboard() {
             </button>
           </div>
         </section>
+
+        {/* RECENT ORDERS */}
 
         <section className="admin-panel admin-orders-panel">
           <div className="admin-panel-heading">
@@ -290,21 +330,49 @@ function AdminDashboard() {
               </thead>
 
               <tbody>
-                {recentOrders.map((order) => (
-                  <tr key={order.id}>
-                    <td>{order.id}</td>
-                    <td>{order.customer}</td>
-                    <td>{order.product}</td>
-                    <td>{order.amount}</td>
-                    <td>
-                      <span
-                        className={`admin-status admin-status-${order.status.toLowerCase()}`}
-                      >
-                        {order.status}
-                      </span>
-                    </td>
+                {loading ? (
+                  <tr>
+                    <td colSpan="5">Loading orders...</td>
                   </tr>
-                ))}
+                ) : recentOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan="5">No orders found</td>
+                  </tr>
+                ) : (
+                  recentOrders.map((order) => (
+                    <tr key={order._id}>
+                      <td>
+                        #{order._id.slice(-6).toUpperCase()}
+                      </td>
+
+                      <td>
+                        {order.user?.name || "Unknown Customer"}
+                      </td>
+
+                      <td>
+                        {order.items
+                          ?.map((item) => item.name)
+                          .join(", ") || "No Products"}
+                      </td>
+
+                      <td>
+                        {formatCurrency(order.totalAmount)}
+                      </td>
+
+                      <td>
+                        <span
+                          className={`admin-status admin-status-${(
+                            order.orderStatus || "placed"
+                          )
+                            .toLowerCase()
+                            .replace(/\s+/g, "-")}`}
+                        >
+                          {order.orderStatus}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

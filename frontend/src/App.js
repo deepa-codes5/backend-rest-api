@@ -18,6 +18,7 @@ import AdminDashboard from "./components/dashboard";
 import ProductManagement from "./components/productManagement";
 import OrderManagement from "./components/ordermanagement";
 import PaymentManagement from "./components/paymentmanagement";
+import UserManagement from "./components/userManagement";
 
 function App() {
   return (
@@ -43,7 +44,7 @@ function App() {
          <Route path="/admin/products" element={<ProductManagement />}/>
          <Route path="/order-management"element={<OrderManagement />}/>
          <Route path="/admin-payments"element={<PaymentManagement />}/>
-
+         <Route path="/admin-users" element={<UserManagement />} />
       </Routes>
     </BrowserRouter>
   );
