@@ -3,11 +3,6 @@ const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema(
   {
-
-    _id: {
-  type: String,
-  required: true
-},
     name: {
       type: String,
       required: true,
@@ -16,29 +11,35 @@ const productSchema = new mongoose.Schema(
 
     description: {
       type: String,
-      required: true
+      required: true,
+      trim: true
     },
 
     price: {
       type: Number,
       required: true,
-      min: 0
+      min: 0.01
     },
 
     category: {
       type: String,
-      required: true
+      required: true,
+      trim: true
     },
 
     image: {
       type: String,
-      required: true
+      default: ""
     },
 
     stock: {
       type: Number,
       default: 0,
-      min: 0
+      min: 0,
+      validate: {
+        validator: Number.isInteger,
+        message: "Stock must be a whole number"
+      }
     },
 
     isActive: {
