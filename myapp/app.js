@@ -21,6 +21,7 @@ const supportTicketRoute = require("./routes/supportTicketRoute");
 const adminOrderRoute = require("./routes/adminOrderRoute");
 const adminDashboardRoute = require("./routes/adminDashboardRoute");
 const adminPaymentRoute = require("./routes/adminPaymentRoute");
+const inventoryRoute = require("./routes/inventoryRoute");
 var app = express();
 
 app.use(cors());
@@ -45,6 +46,7 @@ app.use("/supportTicket", supportTicketRoute);
 app.use("/admin/dashboard", adminDashboardRoute);
 app.use("/admin/orders", adminOrderRoute);
 app.use("/admin/payments", adminPaymentRoute);
+app.use("/inventory", inventoryRoute);
 
 
 mongoose.connect("mongodb://127.0.0.1:27017/studentDB")
