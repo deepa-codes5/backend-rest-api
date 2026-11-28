@@ -414,6 +414,74 @@
   padding: 24px 0 4px;
 }
 
+
+.admin-logo {
+  color: #e879f9;
+}
+
+.admin-nav-item:hover,
+.admin-nav-item.active {
+  color: #f0abfc;
+  background: #30213b;
+  border-color: #653b75;
+}
+
+.admin-greeting {
+  color: #e879f9;
+}
+
+.admin-avatar {
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  color: #ffffff;
+}
+
+.admin-stat-icon {
+  color: #e879f9;
+  background: #35243f;
+}
+
+.admin-chart-bar {
+  background: linear-gradient(180deg, #ec4899, #9333ea);
+}
+
+.admin-chart-note svg {
+  color: #e879f9;
+}
+
+.admin-quick-item > svg {
+  color: #e879f9;
+}
+
+.admin-quick-item:hover {
+  border-color: #c026d3;
+}
+
+.admin-quick-arrow {
+  color: #e879f9;
+}
+
+.admin-view-all {
+  color: #e879f9;
+}
+
+.admin-view-all:hover {
+  border-color: #c026d3;
+}
+
+
+.admin-dashboard button:not(.admin-nav-item):not(.admin-logout) {
+  border-color: #9333ea;
+}
+
+.admin-quick-item,
+.admin-view-all {
+  border-color: #493650;
+}
+
+
+.admin-panel-heading select:focus {
+  border-color: #c026d3;
+}
 @media (max-width: 1100px) {
   .admin-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));

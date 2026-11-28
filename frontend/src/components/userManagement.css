@@ -31,6 +31,8 @@
 
 .user-back-button:hover {
   background: #30213a;
+  border-color: #9333ea;
+  color: #e879f9;
 }
 
 .user-heading {
@@ -44,7 +46,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f43f5e, #f97316);
+  background: linear-gradient(135deg, #9333ea, #ec4899);
   color: white;
 }
 
@@ -96,6 +98,7 @@
 .user-summary-card h2 {
   margin: 0;
   font-size: 25px;
+  color: #e879f9;
 }
 
 .user-table-container {
@@ -128,6 +131,10 @@
   border-radius: 8px;
   background: #15101b;
   color: #a99caf;
+}
+
+.user-search-box:focus-within {
+  border-color: #9333ea;
 }
 
 .user-search-box input {
@@ -180,7 +187,7 @@
 }
 
 .user-table tbody tr:hover {
-  background: #251c2e;
+  background: #30213b;
 }
 
 .user-name-cell {
@@ -234,11 +241,10 @@
   border-radius: 7px;
   color: white;
   cursor: pointer;
-  transition: 0.2s ease;
 }
 
 .user-edit-button {
-  background: #344a70;
+  background: #653b91;
 }
 
 .user-block-button {
@@ -250,7 +256,6 @@
 }
 
 .user-action-buttons button:hover {
-  transform: translateY(-2px);
   filter: brightness(1.2);
 }
 
@@ -285,6 +290,11 @@
   background: #2a2033;
   color: white;
   cursor: pointer;
+}
+
+.user-pagination button:hover:not(:disabled) {
+  border-color: #9333ea;
+  background: #382449;
 }
 
 .user-pagination button:disabled {
@@ -346,6 +356,10 @@
   cursor: pointer;
 }
 
+.user-modal-close:hover {
+  background: #653b75;
+}
+
 .user-edit-modal form {
   display: flex;
   flex-direction: column;
@@ -371,7 +385,7 @@
 
 .user-edit-modal input:focus,
 .user-edit-modal select:focus {
-  border-color: #f97316;
+  border-color: #9333ea;
 }
 
 .user-modal-actions {
@@ -394,9 +408,17 @@
   color: white;
 }
 
+.user-cancel-button:hover {
+  background: #493852;
+}
+
 .user-save-button {
-  background: linear-gradient(135deg, #f43f5e, #f97316);
+  background: linear-gradient(135deg, #9333ea, #ec4899);
   color: white;
+}
+
+.user-save-button:hover {
+  opacity: 0.9;
 }
 
 @media (max-width: 700px) {

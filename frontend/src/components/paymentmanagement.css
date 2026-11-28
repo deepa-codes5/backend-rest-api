@@ -39,10 +39,14 @@
   padding: 12px 18px;
   border: none;
   border-radius: 8px;
-  background: linear-gradient(135deg, #f43f5e, #f97316);
+  background: linear-gradient(135deg, #9333ea, #ec4899);
   color: white;
   font-weight: 600;
   cursor: pointer;
+}
+
+.payment-export-btn:hover {
+  opacity: 0.9;
 }
 
 .payment-stats {
@@ -71,8 +75,8 @@
 }
 
 .revenue-icon {
-  background: #39212e;
-  color: #fb7185;
+  background: #35243f;
+  color: #e879f9;
 }
 
 .success-icon {
@@ -99,6 +103,7 @@
 .payment-stat-card h2 {
   margin: 0;
   font-size: 27px;
+  color: #e879f9;
 }
 
 .payment-transactions {
@@ -140,6 +145,10 @@
   color: #b8acbf;
 }
 
+.payment-search:focus-within {
+  border-color: #9333ea;
+}
+
 .payment-search input {
   width: 100%;
   min-width: 0;
@@ -161,6 +170,10 @@
   outline: none;
   background: #18121f;
   color: #f5f5f5;
+}
+
+.payment-filters select:focus {
+  border-color: #9333ea;
 }
 
 .payment-table-wrapper {
@@ -194,6 +207,10 @@
 
 .payment-table tbody tr:last-child td {
   border-bottom: none;
+}
+
+.payment-table tbody tr:hover {
+  background: #30213b;
 }
 
 .payment-status {
@@ -230,15 +247,16 @@
   justify-content: center;
   width: 34px;
   height: 34px;
-  border: 1px solid #493b53;
+  border: 1px solid #653b75;
   border-radius: 7px;
-  background: #2b2034;
-  color: #fb923c;
+  background: #30213b;
+  color: #e879f9;
   cursor: pointer;
 }
 
 .payment-view-btn:hover {
-  background: #3b2945;
+  background: #3d294b;
+  border-color: #c026d3;
 }
 
 .payment-table-footer {

@@ -20,6 +20,7 @@ import OrderManagement from "./components/ordermanagement";
 import PaymentManagement from "./components/paymentmanagement";
 import UserManagement from "./components/userManagement";
 import InventoryManagement from "./components/InventoryManagement";
+import AdminSettings from "./components/adminsetting";
 function App() {
   return (
     <BrowserRouter>
@@ -46,6 +47,8 @@ function App() {
          <Route path="/admin-payments"element={<PaymentManagement />}/>
          <Route path="/admin-users" element={<UserManagement />} />
          <Route path="/admin-inventory"element={<InventoryManagement />}/>
+         <Route path="/admin-settings" element={<AdminSettings />} />
+
         
       </Routes>
     </BrowserRouter>

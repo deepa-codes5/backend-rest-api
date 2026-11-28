@@ -21,6 +21,11 @@
   cursor: pointer;
 }
 
+.order-back-btn:hover {
+  border-color: #9333ea;
+  color: #e879f9;
+}
+
 .order-heading {
   display: flex;
   justify-content: space-between;
@@ -40,7 +45,7 @@
 
 .order-heading-icon {
   font-size: 38px;
-  color: #f97316;
+  color: #e879f9;
 }
 
 .order-stats {
@@ -65,7 +70,7 @@
 .order-stat-card h2 {
   margin: 12px 0 0;
   font-size: 28px;
-  color: #f97316;
+  color: #e879f9;
 }
 
 .order-toolbar {
@@ -86,6 +91,10 @@
   background: #211929;
   border: 1px solid #403348;
   border-radius: 8px;
+}
+
+.order-search:focus-within {
+  border-color: #9333ea;
 }
 
 .order-search svg {
@@ -112,6 +121,10 @@
   border: 1px solid #403348;
   border-radius: 8px;
   outline: none;
+}
+
+.order-filter:focus {
+  border-color: #9333ea;
 }
 
 .order-filter option,
@@ -152,7 +165,7 @@
 }
 
 .order-table tbody tr:hover {
-  background: #2a2033;
+  background: #30213b;
 }
 
 .payment-badge {
@@ -183,6 +196,10 @@
   cursor: pointer;
 }
 
+.status-select:focus {
+  border-color: #c026d3;
+}
+
 .status-select.pending {
   color: #fcd34d;
 }
@@ -211,16 +228,15 @@
   gap: 7px;
   padding: 9px 12px;
   color: white;
-  background: linear-gradient(135deg, #f43f5e, #f97316);
+  background: linear-gradient(135deg, #9333ea, #ec4899);
   border: none;
   border-radius: 7px;
   cursor: pointer;
 }
 
 .order-view-btn:hover,
-.order-modal-done:hover,
-.order-back-btn:hover {
-  opacity: 0.85;
+.order-modal-done:hover {
+  opacity: 0.9;
 }
 
 .order-empty {
@@ -262,7 +278,7 @@
 }
 
 .order-modal p strong {
-  color: #c4b5fd;
+  color: #e879f9;
 }
 
 .order-modal-close {
