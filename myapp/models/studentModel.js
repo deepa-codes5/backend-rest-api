@@ -1,3 +1,4 @@
+
 const mongoose = require("mongoose");
 
 const studentSchema = new mongoose.Schema({
@@ -9,28 +10,61 @@ const studentSchema = new mongoose.Schema({
     password: String,
 
     mobileNumber: String,
+
     address: String,
-   
-country: String,
+
+    country: String,
 
     role: {
-    type: String,
-    enum: ["admin", "user"],
-    default: "user"
-  },
-  isVerified: { type: Boolean, default: false },
-  isBlocked: { type: Boolean, default: false },
+        type: String,
+        enum: ["admin", "user"],
+        default: "user"
+    },
+
+    isVerified: {
+        type: Boolean,
+        default: false
+    },
+
+    isBlocked: {
+        type: Boolean,
+        default: false
+    },
 
     twoFactorEnabled: {
         type: Boolean,
         default: false
     },
 
-   otp: { type: String },
-   otpExpires: { type: Date }
-});
+    // Admin Notification Settings
+    notificationSettings: {
+        emailNotifications: {
+            type: Boolean,
+            default: true
+        },
+        orderNotifications: {
+            type: Boolean,
+            default: true
+        },
+        paymentNotifications: {
+            type: Boolean,
+            default: true
+        },
+        stockAlerts: {
+            type: Boolean,
+            default: true
+        }
+    },
 
- 
+    otp: {
+        type: String
+    },
+
+    otpExpires: {
+        type: Date
+    }
+
+});
 
 const Student = mongoose.model("Student", studentSchema);
 

@@ -47,7 +47,9 @@ app.use("/admin/dashboard", adminDashboardRoute);
 app.use("/admin/orders", adminOrderRoute);
 app.use("/admin/payments", adminPaymentRoute);
 app.use("/inventory", inventoryRoute);
+const adminSettingsRoute = require("./routes/adminSettingsRoute");
 
+app.use("/admin-settings", adminSettingsRoute);
 
 mongoose.connect("mongodb://127.0.0.1:27017/studentDB")
     .then(() => console.log("MongoDB connected"))
